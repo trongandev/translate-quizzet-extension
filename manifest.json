@@ -1,0 +1,39 @@
+{
+    "manifest_version": 3,
+    "name": "Quizzet Translation Extension",
+    "version": "1.0",
+    "description": "Một công cụ giúp dịch thuật cũng như lưu lại từ vựng nhanh chóng trên trang trongan.site",
+    "permissions": ["activeTab", "cookies", "storage", "scripting", "notifications", "storage", "tabs", "https://www.quizzet.site/*", "https://www.trongan.site/*", "http://localhost:3000/*"],
+    "background": {
+        "service_worker": "src/background.js"
+    },
+    "action": {
+        "default_popup": "src/popup/popup.html"
+    },
+    "content_scripts": [
+        {
+            "matches": ["<all_urls>"],
+            "js": ["src/content.js"]
+        }
+    ],
+    "icons": {
+        "16": "assets/icons.png",
+        "32": "assets/icons.png",
+        "48": "assets/icons.png",
+        "128": "assets/icons.png"
+    },
+    "content_security_policy": {
+        "extension_pages": "script-src 'self'; object-src 'self'"
+    },
+    "host_permissions": ["*://*/*"],
+    "web_accessible_resources": [
+        {
+            "resources": ["assets/*", "src/option/*"],
+            "matches": ["<all_urls>"]
+        }
+    ],
+    "options_ui": {
+        "page": "src/option/option.html",
+        "open_in_tab": true
+    }
+}

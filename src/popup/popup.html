@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <link rel="stylesheet" href="popup.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+        <title>Translation Popup</title>
+    </head>
+    <body>
+        <div class="app-container">
+            <div class="header">
+                <a class="logo" href="https://www.quizzet.site/" target="_blank">
+                    <i class="fas fa-language"></i>
+                    <span>Quizzet</span>
+                </a>
+                <div class="profile">
+                    <img src="https://placehold.co/35x35" id="avatar" alt="Avatar" />
+                    <div class="">
+                        <p id="profile-name">Trọng an</p>
+                        <div class="settings">
+                            <i class="fas fa-cog"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="language-controls">
+                <div class="language-selector">
+                    <select id="source-language">
+                        <option value="auto">Detect Language</option>
+                        <option value="en">English</option>
+                        <option value="vi">Tiếng việt</option>
+                        <option value="es">Spanish</option>
+                        <option value="fr">French</option>
+                        <option value="de">German</option>
+                    </select>
+                </div>
+                <div class="swap-languages">
+                    <button id="swap-btn"><i class="fas fa-exchange-alt"></i></button>
+                </div>
+                <div class="language-selector">
+                    <select id="target-language">
+                        <option value="en">English</option>
+                        <option value="vi" selected>Tiếng việt</option>
+                        <option value="es">Spanish</option>
+                        <option value="fr">French</option>
+                        <option value="de">German</option>
+                    </select>
+                </div>
+            </div>
+
+            <div id="translation-container">
+                <div class="text-box">
+                    <textarea id="input-text" autofocus placeholder="Nhập chữ vào để dịch..."></textarea>
+                    <div class="actions space-between">
+                        <div class="left-actions">
+                            <button id="listen-translation"><i class="fas fa-volume-up"></i></button>
+
+                            <button id="copy-input"><i class="fas fa-copy"></i></button>
+                        </div>
+                        <button id="clear-btn"><i class="fas fa-times"></i></button>
+                    </div>
+                </div>
+
+                <div class="text-box result">
+                    <div id="translated-text">Chữ sau khi dịch sẽ được hiển thị ở đây...</div>
+                    <div class="actions">
+                        <button id="listen-translation"><i class="fas fa-volume-up"></i></button>
+                        <button id="copy-translation"><i class="fas fa-copy"></i></button>
+                        <button id="save-translation"><i class="fas fa-bookmark"></i> Lưu</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <script src="popup.js"></script>
+    </body>
+</html>

@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Quizzet Translation Settings</title>
+        <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet" />
+        <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
+    </head>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "Roboto", sans-serif;
+        }
+
+        body {
+            background-color: #f5f5f5;
+            color: #333;
+            padding: 20px;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .container {
+            width: 550px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+        }
+
+        .header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 30px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 15px;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: 600;
+            color: #4285f4;
+            margin-right: 10px;
+        }
+
+        .header h1 {
+            font-size: 22px;
+            font-weight: 500;
+        }
+
+        .section {
+            margin-bottom: 25px;
+        }
+
+        .section-title {
+            font-size: 18px;
+            font-weight: 500;
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        select,
+        input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .toggle {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 15px;
+        }
+
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 24px;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: 0.3s;
+            border-radius: 24px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: 0.3s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background-color: #4285f4;
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(26px);
+        }
+
+        .buttons {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        button {
+            padding: 10px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: background 0.3s;
+        }
+
+        .save-btn {
+            background: #4285f4;
+            color: white;
+        }
+
+        .save-btn:hover {
+            background: #3367d6;
+        }
+
+        .reset-btn {
+            background: #f1f1f1;
+            color: #333;
+        }
+
+        .reset-btn:hover {
+            background: #e1e1e1;
+        }
+
+        .language-settings {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 15px;
+        }
+
+        .language-settings .form-group {
+            flex: 1;
+        }
+    </style>
+    <body>
+        <div class="container">
+            <div class="header">
+                <span class="logo">
+                    <span class="material-icons">translate</span>
+                </span>
+                <h1>Quizzet Translation Settings</h1>
+            </div>
+
+            <h2 class="section-title">Ngôn ngữ đích muốn lưu vào flashcard trên trang web</h2>
+            <div class="section language-settings">
+                <div class="form-group">
+                    <select id="sourceLanguage">
+                        <option value="english">Tiếng Anh</option>
+                        <option value="vietnamese">Tiếng Việt</option>
+                        <option value="french">Tiếng Pháp</option>
+                        <option value="german">Tiếng Đức</option>
+                        <option value="spanish">Tiếng Tây Ban Nha</option>
+                        <option value="chinese">Tiếng Trung</option>
+                        <option value="korean">Tiếng Hàn</option>
+                        <option value="japanese">Tiếng Nhật</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2 class="section-title">Vị trí lưu flashcard</h2>
+                <div class="form-group">
+                    <select id="sourceFlashcard"></select>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2 class="section-title">Phím tắt</h2>
+                <div class="form-group">
+                    <label for="translateShortcut">Mở popup</label>
+                    <input type="text" id="translateShortcut" placeholder="e.g. Ctrl+I" value="Ctrl+I" disabled />
+                </div>
+            </div>
+
+            <div class="buttons">
+                <button class="reset-btn">Reset to Default</button>
+                <button class="save-btn">Save Settings</button>
+            </div>
+        </div>
+
+        <script src="options.js"></script>
+    </body>
+</html>

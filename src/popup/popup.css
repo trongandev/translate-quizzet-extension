@@ -1,0 +1,306 @@
+:root {
+    --primary-color: #4285f4;
+    --secondary-color: #fbbc05;
+    --text-color: #333;
+    --light-bg: #f5f5f5;
+    --border-color: #ddd;
+    --hover-color: #e8f0fe;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+    width: 400px;
+    height: 500px;
+    overflow-y: scroll;
+}
+
+.app-container {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    background-color: white;
+}
+
+/* Header styles */
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 16px;
+    background-color: var(--primary-color);
+    color: white;
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 18px;
+    font-weight: bold;
+    color: white;
+    text-decoration: none;
+}
+
+.logo i {
+    font-size: 24px;
+}
+
+.profile {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.profile #avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    overflow: hidden;
+    object-fit: cover;
+}
+
+.settings {
+    cursor: pointer;
+}
+
+/* Language controls */
+.language-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 16px;
+    background-color: var(--light-bg);
+    border-bottom: 1px solid var(--border-color);
+}
+
+/* .language-selector select {
+    flex: 1;
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    background-color: white;
+    font-size: 14px;
+} */
+
+.language-selector {
+    flex: 1;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.language-selector select {
+    appearance: none;
+    width: 100%;
+    padding: 0.675em 1em 0.675em 1em;
+    background-color: #fff;
+    border: 1px solid #caced1;
+    border-radius: 0.25rem;
+    color: #000;
+    cursor: pointer;
+}
+
+.language-selector select:focus-visible {
+    outline: none;
+}
+
+.language-selector::before,
+.language-selector::after {
+    --size: 0.2rem;
+    content: "";
+    position: absolute;
+    right: 1rem;
+    pointer-events: none;
+}
+
+.language-selector::before {
+    border-left: var(--size) solid transparent;
+    border-right: var(--size) solid transparent;
+    border-bottom: var(--size) solid #6b6b6b;
+    top: 40%;
+}
+
+.language-selector::after {
+    border-left: var(--size) solid transparent;
+    border-right: var(--size) solid transparent;
+    border-top: var(--size) solid #6b6b6b;
+    top: 55%;
+}
+
+#swap-btn {
+    flex: 1;
+    background-color: white;
+    color: #6b6b6b;
+    border: 1px solid var(--border-color);
+    border-radius: 50%;
+    width: 32px;
+    height: 32px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#swap-btn:hover {
+    background-color: var(--hover-color);
+    color: var(--primary-color);
+}
+
+/* Translation container */
+#translation-container {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    padding: 16px;
+}
+
+.text-box {
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    overflow: hidden;
+    background-color: white;
+}
+
+textarea#input-text {
+    width: 100%;
+    min-height: 120px;
+    padding: 12px;
+    border: none;
+    resize: none;
+    font-size: 16px;
+}
+textarea#input-text:focus-visible {
+    outline: none;
+}
+
+#translated-text {
+    min-height: 120px;
+    padding: 12px;
+    font-size: 16px;
+    color: var(--text-color);
+}
+
+.actions {
+    display: flex;
+    justify-content: flex-end;
+    border-top: 1px solid var(--border-color);
+    padding: 8px;
+    gap: 8px;
+}
+
+.space-between {
+    justify-content: space-between;
+}
+
+.actions .left-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.actions button {
+    padding: 6px 12px;
+    border: none;
+    border-radius: 4px;
+    background-color: var(--light-bg);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    color: var(--text-color);
+}
+
+.actions button:hover {
+    background-color: var(--hover-color);
+    color: var(--primary-color);
+}
+
+#translate-btn,
+#save-translation {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+#translate-btn:hover,
+#save-translation:hover {
+    background-color: #3367d6;
+}
+
+/* Footer */
+.footer {
+    display: flex;
+    border-top: 1px solid var(--border-color);
+}
+
+.history-btn,
+.bookmarks-btn {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 10px;
+    cursor: pointer;
+    color: var(--text-color);
+}
+
+.history-btn i,
+.bookmarks-btn i {
+    font-size: 18px;
+    margin-bottom: 4px;
+}
+
+.history-btn:hover,
+.bookmarks-btn:hover {
+    background-color: var(--hover-color);
+}
+
+/* Add this to your existing CSS file */
+.loading {
+    opacity: 0.7;
+    position: relative;
+}
+
+.loading::after {
+    content: "...";
+    animation: loading 1.5s infinite;
+    position: absolute;
+    margin-left: 5px;
+}
+
+@keyframes loading {
+    0% {
+        content: ".";
+    }
+    33% {
+        content: "..";
+    }
+    66% {
+        content: "...";
+    }
+}
+
+/* Make sure the notification styles are also included */
+.notification {
+    position: fixed;
+    bottom: -60px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: rgba(0, 0, 0, 0.7);
+    color: white;
+    padding: 10px 20px;
+    border-radius: 5px;
+    transition: bottom 0.3s ease;
+    z-index: 9999;
+}
+
+.notification.show {
+    bottom: 20px;
+}
