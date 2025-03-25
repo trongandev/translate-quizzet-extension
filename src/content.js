@@ -240,6 +240,11 @@ function hideUI() {
     translationModal.style.display = "none";
 }
 
+function showUI() {
+    customButton.style.display = "none";
+    translationModal.style.display = "block";
+}
+
 function requestTranslation(text) {
     translationModal.innerHTML = LOADER_UI;
 
@@ -251,10 +256,9 @@ function requestTranslation(text) {
                 targetLanguage: "vi", // Default target language
             },
             function (response) {
-                console.log("Translation response:", response);
                 if (response && !response.error) {
                     translationModal.innerHTML = getHTMLTemplate(response.translation);
-                    setupModalEventListeners();
+                    setupModalEventListeners(text);
                 } else {
                     translationModal.innerHTML = `
                         <div style="padding: 15px; text-align: center;">
@@ -274,14 +278,7 @@ function requestTranslation(text) {
     }
 }
 
-function setupModalEventListeners() {
-    const header = translationModal.querySelector(".header");
-    if (header) {
-        header.addEventListener("click", function (e) {
-            e.stopPropagation();
-        });
-    }
-
+function setupModalEventListeners(text) {
     const closeButton = translationModal.querySelector(".close-button");
     if (closeButton) {
         closeButton.addEventListener("click", function (e) {
@@ -289,24 +286,25 @@ function setupModalEventListeners() {
             hideUI();
         });
     }
-
     const speakButton = translationModal.querySelector(".speak-button");
     if (speakButton) {
         speakButton.addEventListener("click", function (e) {
             e.stopPropagation();
-            const selectedText = window.getSelection().toString().trim();
-            if (selectedText) {
-                const utterance = new SpeechSynthesisUtterance(selectedText);
+            showUI();
+            showNotification("Đang phát âm");
+            if (text) {
+                const utterance = new SpeechSynthesisUtterance(text);
                 utterance.lang = "en-US";
                 speechSynthesis.speak(utterance);
             }
         });
     }
-
     const settingButton = translationModal.querySelector(".settings-button");
     if (settingButton) {
         settingButton.addEventListener("click", function (e) {
             e.stopPropagation();
+            showUI();
+
             if (chrome.runtime.openOptionsPage) {
                 chrome.runtime.openOptionsPage();
             } else {
@@ -314,29 +312,37 @@ function setupModalEventListeners() {
             }
         });
     }
-
     const saveButton = translationModal.querySelector(".save-button");
     if (saveButton) {
         saveButton.addEventListener("click", function (e) {
             e.stopPropagation();
-            const selectedText = window.getSelection().toString().trim();
-            if (selectedText) {
+            saveButton.style.cursor = "wait";
+            saveButton.style.opacity = "0.5";
+            showNotification("Đang lưu từ vựng, khoảng 2s sẽ hoàn tất");
+            showUI();
+            if (text) {
                 // Save translation to local storage or send to server
                 chrome.storage.local.get(["list_flashcard_id"], function (result) {
                     list_flashcard_id = result.list_flashcard_id;
                     if (!list_flashcard_id) {
-                        alert("Vui lòng chọn flashcard trước khi lưu, vào setting để chọn flashcard");
+                        showNotification("Vui lòng chọn flashcard trước khi lưu, vào setting để chọn flashcard");
+                        saveButton.style.cursor = "pointer";
+                        saveButton.style.opacity = "1";
                         return;
                     }
                     chrome.runtime.sendMessage(
                         {
                             action: "save-translation",
-                            text: selectedText,
+                            text: text,
                             list_flashcard_id,
                         },
                         function (response) {
                             if (!response.ok) {
-                                alert("Failed to save translation.");
+                                showNotification("Lưu từ vựng thất bại");
+                            } else {
+                                showNotification("Lưu từ vựng thành công");
+                                saveButton.style.cursor = "pointer";
+                                saveButton.style.opacity = "1";
                             }
                         }
                     );
@@ -394,3 +400,51 @@ customButton.addEventListener("click", function (event) {
 translationModal.addEventListener("click", function (e) {
     e.stopPropagation();
 });
+
+function showNotification(message) {
+    const style = document.createElement("style");
+    style.textContent = `
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 50%;
+            transform: translateX(50%);
+            background-color: #4caf50;
+            color: white;
+            padding: 15px;
+            border-radius: 5px;
+            z-index: ${Z_INDEX_BASE + 2};
+            opacity: 0;
+            transition: opacity 0.3s ease-in-out;
+        }
+        .notification.show {
+            opacity: 1;
+        }
+        .notification.error {
+            background-color: #f44336;
+        }
+        .notification.success {
+            background-color: #4caf50;
+        }
+    `;
+
+    document.head.appendChild(style);
+
+    const notification = document.createElement("div");
+    notification.className = "notification";
+    notification.textContent = message;
+    document.body.appendChild(notification);
+
+    // Hiển thị notification
+    setTimeout(() => {
+        notification.classList.add("show");
+    }, 10);
+
+    // Ẩn sau 2 giây
+    setTimeout(() => {
+        notification.classList.remove("show");
+        setTimeout(() => {
+            notification.remove();
+        }, 300);
+    }, 2000);
+}

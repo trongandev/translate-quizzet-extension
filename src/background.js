@@ -1,4 +1,4 @@
-const QUIZZET_BACKEND_API = "http://localhost:5000/api";
+const QUIZZET_BACKEND_API = "https://quizzet-be.vercel.app/api";
 const GOOGLE_TRANSLATE_API = "https://translate.googleapis.com/translate_a/single";
 const MAX_TEXT_LENGTH = 4000; // Giới hạn ký tự cho mỗi yêu cầu API
 const DETECT_LANGUAGE_LIMIT = 100; // Số ký tự tối đa để phát hiện ngôn ngữ
@@ -120,7 +120,6 @@ async function translateText(text, targetLanguage, sourceLanguage = "auto") {
 
     const cacheKey = `${text.substring(0, 50)}-${sourceLanguage}-${targetLanguage}`;
     if (translationCache.has(cacheKey)) {
-        console.log("Using cached translation");
         return translationCache.get(cacheKey);
     }
 
@@ -219,8 +218,7 @@ async function translateChunk(text, targetLanguage, sourceLanguage) {
                 }
             });
         }
-        console.log("Translated text:", translatedText);
-        console.log("Translations by type:", translationsByType);
+
         return {
             mainTranslation: translatedText,
             translationsByType: translationsByType,
@@ -281,7 +279,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                 .then((data) => {
                     chrome.storage.local.get(["translation"], (result) => {
                         const translation = result.translation || [];
-                        translation.push(request.translation);
+                        translation.push(request.text);
                         chrome.storage.local.set({ translation });
                     });
                     sendResponse(data);
@@ -298,23 +296,19 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
 // Replace the three cookie.get calls with this function
 const tokenSources = [
-    { url: "http://localhost:3000", name: "token", storeLocally: true },
+    // { url: "http://localhost:3000", name: "token", storeLocally: true },
     // { url: "https://www.trongan.site/", name: "token" },
-    // { url: "https://www.quizzet.site/", name: "token" },
+    { url: "https://www.quizzet.site/", name: "token" },
 ];
 
 function fetchTokens() {
     tokenSources.forEach((source) => {
         chrome.cookies.get({ url: source.url, name: source.name }, (cookie) => {
-            if (cookie) {
-                const identifier = new URL(source.url).hostname;
-                console.log(`Token ${identifier}:`, cookie.value);
+            const identifier = new URL(source.url).hostname;
+            console.log(`Token ${identifier}:`, cookie.value);
 
-                // Only store the localhost token in local storage
-                if (source.storeLocally) {
-                    chrome.storage.local.set({ token: cookie.value });
-                }
-            }
+            // Only store the localhost token in local storage
+            chrome.storage.local.set({ token: cookie.value });
         });
     });
 }
@@ -323,7 +317,7 @@ function fetchTokens() {
 fetchTokens();
 
 function checkUpdate() {
-    fetch("https://raw.githubusercontent.com/DuckCIT/TikTok-Comment-Translator/main/data/version.json")
+    fetch("https://raw.githubusercontent.com/angutboiz/translate-quizzet-extension/refs/heads/main/data/version.json")
         .then((response) => response.json())
         .then((data) => {
             const currentVersion = chrome.runtime.getManifest().version;
@@ -336,7 +330,7 @@ function checkUpdate() {
                         // Hiển thị thông báo toast
                         chrome.notifications.create("update_notification", {
                             type: "basic",
-                            iconUrl: "icons/icon.png",
+                            iconUrl: "assets/icons.png",
                             title: "Cập nhật mới!",
                             message: `Phiên bản mới (${data.version}) đã có sẵn. Nhấp vào đây để cập nhật.`,
                             priority: 2,
@@ -345,7 +339,7 @@ function checkUpdate() {
                         // Mở trang cập nhật khi người dùng bấm vào thông báo
                         chrome.notifications.onClicked.addListener((notificationId) => {
                             if (notificationId === "update_notification") {
-                                chrome.tabs.create({ url: "https://github.com/DuckCIT/TikTok-Comment-Translator" });
+                                chrome.tabs.create({ url: "https://github.com/angutboiz/translate-quizzet-extension" });
                             }
                         });
                     }
@@ -355,10 +349,9 @@ function checkUpdate() {
         .catch(() => {}); // Bỏ qua lỗi
 }
 
-function fetchProfile() {
+async function fetchProfile() {
     chrome.storage.local.get(["token"], (result) => {
         fetch(`${QUIZZET_BACKEND_API}/profile`, {
-            method: "GET",
             headers: {
                 Authorization: `Bearer ${result.token}`,
             },
@@ -373,7 +366,7 @@ function fetchProfile() {
     });
 }
 
-function fetchFlashcard() {
+async function fetchFlashcard() {
     chrome.storage.local.get(["token"], (result) => {
         fetch(`${QUIZZET_BACKEND_API}/list-flashcards`, {
             headers: {
@@ -390,8 +383,15 @@ function fetchFlashcard() {
     });
 }
 
+chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+    if (request.action === "refresh") {
+        fetchProfile();
+        fetchFlashcard();
+        sendResponse({ ok: true });
+    }
+});
+
 // Kiểm tra khi extension khởi động hoặc cài đặt
 chrome.runtime.onStartup.addListener(checkUpdate);
-chrome.runtime.onInstalled.addListener(fetchFlashcard);
 chrome.runtime.onInstalled.addListener(fetchProfile);
-chrome.runtime.onInstalled.addListener(checkUpdate);
+chrome.runtime.onInstalled.addListener(fetchFlashcard);

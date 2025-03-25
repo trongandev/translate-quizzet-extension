@@ -1,6 +1,6 @@
-# Tiện Ích Mở Rộng Dịch Thuật
+# Quizzet Translate Extension
 
-Tiện ích mở rộng Chrome này cho phép người dùng dịch văn bản đã chọn trên trang web bằng API Google Translate. Nó hiển thị một biểu tượng bên dưới từ đã chọn, và khi nhấp vào biểu tượng, bản dịch sẽ được hiển thị cùng với tùy chọn lưu bản dịch vào mục đánh dấu.
+Quizzet Translate Extension này cho phép người dùng dịch văn bản đã chọn trên trang web bằng API Google Translate. Nó hiển thị một biểu tượng bên dưới từ đã chọn, và khi nhấp vào biểu tượng, bản dịch sẽ được hiển thị cùng với tùy chọn lưu bản dịch vào mục đánh dấu.
 
 ## Tính Năng
 

@@ -16,7 +16,6 @@ const translationCache = new Map();
 async function translateText(text, targetLanguage, sourceLanguage = "auto") {
     const cacheKey = `${text}-${sourceLanguage}-${targetLanguage}`;
     if (translationCache.has(cacheKey)) {
-        console.log("Using cached translation");
         return translationCache.get(cacheKey);
     }
 
@@ -27,7 +26,6 @@ async function translateText(text, targetLanguage, sourceLanguage = "auto") {
     if (text.length <= MAX_TEXT_LENGTH) {
         try {
             const url = `${GOOGLE_TRANSLATE_API}?client=gtx&sl=${sourceLanguage}&tl=${targetLanguage}&dt=t&q=${encodeURIComponent(text)}`;
-            console.log("Translation URL:", url);
 
             const response = await fetch(url);
             if (!response.ok) {
@@ -36,7 +34,6 @@ async function translateText(text, targetLanguage, sourceLanguage = "auto") {
             }
 
             const data = await response.json();
-            console.log("Translation data:", data);
 
             if (!data || !data[0]) {
                 console.error("Invalid data structure:", data);
@@ -58,16 +55,13 @@ async function translateText(text, targetLanguage, sourceLanguage = "auto") {
 
     // Dịch văn bản dài bằng cách chia nhỏ
     try {
-        console.log("Translating long text in chunks");
         const chunks = [];
         for (let i = 0; i < text.length; i += MAX_TEXT_LENGTH) {
             chunks.push(text.slice(i, i + MAX_TEXT_LENGTH));
         }
 
-        console.log(`Split into ${chunks.length} chunks`);
         const translatedChunks = await Promise.all(
             chunks.map(async (chunk, index) => {
-                console.log(`Translating chunk ${index + 1}/${chunks.length}`);
                 const url = `${GOOGLE_TRANSLATE_API}?client=gtx&sl=${sourceLanguage}&tl=${targetLanguage}&dt=t&q=${encodeURIComponent(chunk)}`;
                 const response = await fetch(url);
                 if (!response.ok) throw new Error(`API không phản hồi cho phần ${index + 1}`);
@@ -211,23 +205,23 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // load dữ liệu cũ từ storage
     chrome.storage.local.get(["lastWord"], function (result) {
-        // translationCache = new Map(result.lastWord);
-        console.log(result);
-        inputText.value = result.lastWord.text;
-        translatedText.textContent = result.lastWord.result;
-        sourceLanguageSelect.value = result.lastWord.sourceLanguage;
-        targetLanguageSelect.value = result.lastWord.targetLanguage;
+        if (result.lastWord) {
+            inputText.value = result.lastWord.text;
+            translatedText.textContent = result.lastWord.result;
+            sourceLanguageSelect.value = result.lastWord.sourceLanguage;
+            targetLanguageSelect.value = result.lastWord.targetLanguage;
+        }
     });
 
     // Hàm thực hiện dịch
     async function performTranslation() {
         const text = inputText.value.trim();
         if (!text) {
-            translatedText.textContent = "Chữ sau khi dịch sẽ được hiển thị ở đây...";
+            translatedText.ariaPlaceholder = "Chữ sau khi dịch sẽ được hiển thị ở đây...";
             return;
         }
 
-        translatedText.textContent = "Đang dịch...";
+        translatedText.ariaPlaceholder = "Đang dịch";
         translatedText.classList.add("loading");
 
         let sourceLanguage = sourceLanguageSelect.value;
@@ -240,7 +234,6 @@ document.addEventListener("DOMContentLoaded", function () {
                 sourceLanguageSelect.disabled = true;
                 try {
                     sourceLanguage = await detectLanguage(text);
-                    console.log("Detected language:", sourceLanguage);
                     // Cập nhật select box với ngôn ngữ phát hiện được
                     if (sourceLanguage !== "auto" && sourceLanguage !== "und") {
                         const options = Array.from(sourceLanguageSelect.options);
@@ -259,7 +252,6 @@ document.addEventListener("DOMContentLoaded", function () {
             }
 
             // Thực hiện dịch
-            console.log(`Translating from ${sourceLanguage} to ${targetLanguage}`);
             const result = await translateText(text, targetLanguage, sourceLanguage);
 
             if (!result) {
@@ -357,8 +349,20 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // thay đổi hình ảnh src của avatar
     chrome.storage.local.get(["profile"], function (result) {
-        avatar.setAttribute("src", result.profile.profilePicture || "https://placehold.co/35x35");
-        profileName.textContent = result.profile.displayName || "Chưa đăng nhập";
+        if (!result.profile) {
+            profileName.textContent = "Nhấn vào cài đặt";
+            avatar.style.display = "none";
+            showNotification("Chưa có thông tin người dùng");
+            return;
+        }
+        avatar.setAttribute("src", result.profile.profilePicture);
+        avatar.setAttribute("alt", result.profile.displayName);
+        avatar.setAttribute("href", "https://www.quizzet.site/profile/" + result.profile._id);
+        avatar.setAttribute("target", "_blank");
+        profileName.textContent = result.profile.displayName;
+        profileName.setAttribute("href", "https://www.quizzet.site/profile/" + result.profile._id);
+        profileName.setAttribute("target", "_blank");
+        showNotification("Load thông tin người dùng thành công");
     });
 
     // Sự kiện nhấn Enter trong textarea để dịch

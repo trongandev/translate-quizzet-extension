@@ -2,8 +2,8 @@
     "manifest_version": 3,
     "name": "Quizzet Translation Extension",
     "version": "1.0",
-    "description": "Một công cụ giúp dịch thuật cũng như lưu lại từ vựng nhanh chóng trên trang trongan.site",
-    "permissions": ["activeTab", "cookies", "storage", "scripting", "notifications", "storage", "tabs", "https://www.quizzet.site/*", "https://www.trongan.site/*", "http://localhost:3000/*"],
+    "description": "Một công cụ giúp dịch thuật cũng như lưu lại từ vựng nhanh chóng trên trang quizzet.site",
+    "permissions": ["activeTab", "cookies", "storage", "scripting", "notifications", "storage", "tabs"],
     "background": {
         "service_worker": "src/background.js"
     },
