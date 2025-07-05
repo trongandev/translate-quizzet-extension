@@ -178,6 +178,7 @@ function debounce(func, delay) {
 
 // Khởi tạo UI và xử lý sự kiện khi trang được load
 document.addEventListener("DOMContentLoaded", function () {
+    chrome.runtime.sendMessage({ action: "fetchTokens" });
     const inputText = document.getElementById("input-text");
     const translatedText = document.getElementById("translated-text");
     const clearBtn = document.getElementById("clear-btn");
@@ -188,12 +189,26 @@ document.addEventListener("DOMContentLoaded", function () {
     const sourceLanguageSelect = document.getElementById("source-language");
     const targetLanguageSelect = document.getElementById("target-language");
     const swapBtn = document.getElementById("swap-btn");
+    const profile = document.getElementById("profile");
     const avatar = document.getElementById("avatar");
     const profileName = document.getElementById("profile-name");
-    const settingButton = document.querySelector(".settings");
+    const noLogin = document.getElementById("no-login");
+    const setting1Button = document.querySelector(".set1");
+    const setting2Button = document.querySelector(".set2");
 
-    if (settingButton) {
-        settingButton.addEventListener("click", function (e) {
+    if (setting1Button) {
+        setting1Button.addEventListener("click", function (e) {
+            e.stopPropagation();
+            if (chrome.runtime.openOptionsPage) {
+                chrome.runtime.openOptionsPage();
+            } else {
+                window.open(chrome.runtime.getURL("option.html"));
+            }
+        });
+    }
+
+    if (setting2Button) {
+        setting2Button.addEventListener("click", function (e) {
             e.stopPropagation();
             if (chrome.runtime.openOptionsPage) {
                 chrome.runtime.openOptionsPage();
@@ -350,11 +365,13 @@ document.addEventListener("DOMContentLoaded", function () {
     // thay đổi hình ảnh src của avatar
     chrome.storage.local.get(["profile"], function (result) {
         if (!result.profile) {
-            profileName.textContent = "Nhấn vào cài đặt";
-            avatar.style.display = "none";
+            profile.style.display = "none";
+            noLogin.style.display = "flex";
             showNotification("Chưa có thông tin người dùng");
             return;
         }
+        profile.style.display = "flex";
+        noLogin.style.display = "none";
         avatar.setAttribute("src", result.profile.profilePicture);
         avatar.setAttribute("alt", result.profile.displayName);
         avatar.setAttribute("href", "https://www.quizzet.site/profile/" + result.profile._id);

@@ -3,8 +3,9 @@ const ICONS = {
     main: chrome.runtime.getURL("../assets/icons.png"),
     volume: chrome.runtime.getURL("../assets/volume-2.svg"),
     close: chrome.runtime.getURL("../assets/x.svg"),
-    star: chrome.runtime.getURL("../assets/star.svg"),
+    star: chrome.runtime.getURL("../assets/star-fill.svg"),
     settings: chrome.runtime.getURL("../assets/settings.svg"),
+    sparkles: chrome.runtime.getURL("../assets/sparkles.svg"),
 };
 
 const MIN_MODAL_WIDTH = 180;
@@ -52,8 +53,15 @@ function getHTMLTemplate(translation) {
     const matches = translation?.matches || [{ translation: "No translation available" }, { translation: "" }, { translation: "" }];
 
     return `
-        <div class="quizzet-translator">
+     <div class="quizzet-translator">
             <style>
+                .quizzet-translator {
+                    min-width: 200px;
+                    min-height: 80px;
+                    box-shadow: rgba(14, 30, 37, 0.12) 0px 2px 4px 0px, rgba(14, 30, 37, 0.32) 0px 2px 16px 0px;
+                    border-radius: 10px;
+                    font-family: Segoe UI, Tahoma, Geneva, Verdana, sans-serif;
+                }
                 .quizzet-translator .header {
                     display: flex;
                     align-items: center;
@@ -62,7 +70,7 @@ function getHTMLTemplate(translation) {
                     flex: 1;
                 }
 
-                .quizzet-translator .header img {
+                .quizzet-translator img {
                     width: 17px;
                     height: 17px;
                     cursor: pointer;
@@ -81,74 +89,86 @@ function getHTMLTemplate(translation) {
                     margin: 0;
                     padding: 10px 15px;
                     color: #1a1f2a;
-                    font-size: 15px;
+                    font-size: 14px;
                 }
-              
+                .quizzet-translator footer {
+                    display: flex;
+                    flex-direction: column;
+                    gap: 8px;
+                }
                 footer p.type {
-                    color: #557791;
+                    color: #94acbf;
                     font-style: italic;
                     margin: 0;
-                    font-size: 14px;
+                    font-size: 13px;
                 }
                 .quizzet-translator footer p.content {
                     color: #3b3b3b;
                     font-style: normal;
-                    font-size: 16px;
+                    font-size: 14px;
                     margin: 0;
                 }
                 .quizzet-translator footer div {
                     border-top: 1px dashed #dfe0e3;
+                    padding: 5px 15px;
+                }
+                .quizzet-translator .save {
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
                     padding: 10px 15px;
+                    background-color: #2187d5;
+                    color: white;
+                    border: none;
+                    border-radius: 0 0 10px 10px;
+                    cursor: pointer;
+                    gap: 8px;
+                    font-size: 12px;
+                }
+                .quizzet-translator .save:hover {
+                    background-color: #1a6bb0;
                 }
             </style>
             <div class="header">
-                <img src="${ICONS.volume}" alt="Speak" class="speak-button" />
-                <img src="${ICONS.star}" alt="Save" class="save-button" title="Thay đổi vị trí lưu flashcard, bấm vào setting"/>
+                <img src="${ICONS.volume}" alt="Speak" class="speak-button" title="Phát âm thanh" />
+                <img src="${ICONS.sparkles}" title="Dịch bằng AI" alt="Speak" class="sparkles-button" />
                 <div class="right">
                     <img src="${ICONS.settings}" alt="Settings" class="settings-button" />
-                    <img src="${ICONS.close}" alt="Close" class="close-button" />
+                    <img src="${ICONS.close}" alt="Close" class="close-button" title="Đóng cửa sổ" />
                 </div>
             </div>
             <main>
-                <p>${matches[0]?.translation || ""}</p>
+                <p class="translate-vi">${matches[0]?.translation || ""}</p>
             </main>
             <footer>
                 ${
                     matches[1]?.partOfSpeech
-                        ? `
-                    <div class="">
-                        <p class="type">${matches[1]?.partOfSpeech}</p>
-                    </div>
-                `
+                        ? `<div class="">
+                            <p class="type">${matches[1]?.partOfSpeech}</p>
+                        </div>`
                         : ""
                 }
-                ${
-                    matches[2]?.partOfSpeech
-                        ? `
-                    <div class="">
-                        <p class="type">${matches[2]?.partOfSpeech}</p>
-                    </div>
-                `
-                        : ""
-                }
+                
+                <button class="save" title="Thay đổi vị trí lưu flashcard, bấm vào setting">  <img src="${ICONS.star}" alt="Save" class="save-button" /><p>Lưu vào Flashcard</p></button>
             </footer>
         </div>
+      
     `;
 }
 
 const LOADER_UI = `
-    <div class="spinner-container">
+    <div class="spinner-container-quizzet">
         <div class="spinner">
             <span></span>
             <span></span>
             <span></span>
             <style>
-                .spinner-container {
+                .spinner-container-quizzet {
                     display: flex;
                     justify-content: center;
                     align-items: center;
                 }
-                .spinner {
+                .spinner-container-quizzet .spinner {
                     --clr: #2187d5;
                     --gap: 6px;
                     width: 70px;
@@ -159,7 +179,7 @@ const LOADER_UI = `
                     gap: var(--gap);
                 }
 
-                .spinner span {
+                .spinner-container-quizzet .spinner span {
                     width: 15px;
                     height: 15px;
                     border-radius: 100%;
@@ -167,15 +187,15 @@ const LOADER_UI = `
                     opacity: 0;
                 }
 
-                .spinner span:nth-child(1) {
+                .spinner-container-quizzet .spinner span:nth-child(1) {
                     animation: fade 1s ease-in-out infinite;
                 }
 
-                .spinner span:nth-child(2) {
+                .spinner-container-quizzet .spinner span:nth-child(2) {
                     animation: fade 1s ease-in-out 0.33s infinite;
                 }
 
-                .spinner span:nth-child(3) {
+                .spinner-container-quizzet .spinner span:nth-child(3) {
                     animation: fade 1s ease-in-out 0.66s infinite;
                 }
 
@@ -312,18 +332,52 @@ function setupModalEventListeners(text) {
             }
         });
     }
-    const saveButton = translationModal.querySelector(".save-button");
+
+    const sparklesButton = translationModal.querySelector(".sparkles-button");
+    if (sparklesButton) {
+        sparklesButton.addEventListener("click", function (e) {
+            e.stopPropagation();
+            showUI();
+            sparklesButton.style.cursor = "wait";
+            sparklesButton.style.opacity = "0.5";
+            showNotification("Đang dịch bằng AI...");
+            chrome.runtime.sendMessage({ action: "ai-enhance", text }, function (response) {
+                if (response.ok) {
+                    translationModal.querySelector(".quizzet-translator main p.translate-vi").textContent = response.parse;
+                    showNotification("Đã tối ưu hóa nội dung");
+                } else {
+                    showNotification("Không thể tối ưu hóa nội dung");
+                }
+                sparklesButton.style.cursor = "pointer";
+                sparklesButton.style.opacity = "1";
+            });
+        });
+    }
+
+    const saveButton = translationModal.querySelector(".save");
+    const textBtn = saveButton.querySelector("p");
+    chrome.storage.local.get(["list_flashcard_id"], function (result) {
+        if (!result.list_flashcard_id) {
+            textBtn.textContent = `Bạn chưa đăng nhập, bấm vào cài đặt`;
+            window.open(chrome.runtime.getURL("src/option/option.html"));
+            saveButton.style.cursor = "not-allowed";
+            saveButton.style.opacity = "0.5";
+            return;
+        }
+        textBtn.textContent = `Lưu vào ["${result.list_flashcard_id.name}"]`;
+    });
     if (saveButton) {
         saveButton.addEventListener("click", function (e) {
             e.stopPropagation();
             saveButton.style.cursor = "wait";
             saveButton.style.opacity = "0.5";
-            showNotification("Đang lưu từ vựng, khoảng 2s sẽ hoàn tất");
             showUI();
             if (text) {
                 // Save translation to local storage or send to server
                 chrome.storage.local.get(["list_flashcard_id"], function (result) {
-                    list_flashcard_id = result.list_flashcard_id;
+                    showNotification(`Đang lưu từ vựng vào ["${result.list_flashcard_id.name}"] `);
+                    list_flashcard_id = result.list_flashcard_id.id;
+                    textBtn.textContent = `Đang lưu vào ["${result.list_flashcard_id.name}"]...`;
                     if (!list_flashcard_id) {
                         showNotification("Vui lòng chọn flashcard trước khi lưu, vào setting để chọn flashcard");
                         saveButton.style.cursor = "pointer";
@@ -340,9 +394,10 @@ function setupModalEventListeners(text) {
                             if (!response.ok) {
                                 showNotification("Lưu từ vựng thất bại");
                             } else {
-                                showNotification("Lưu từ vựng thành công");
+                                showNotification(`Lưu từ "${response.flashcard.title}" vào flashcard ["${result.list_flashcard_id.name}"] thành công`);
                                 saveButton.style.cursor = "pointer";
                                 saveButton.style.opacity = "1";
+                                textBtn.textContent = `Lưu vào ["${result.list_flashcard_id.name}"]`;
                             }
                         }
                     );
@@ -410,7 +465,7 @@ function showNotification(message) {
             right: 50%;
             transform: translateX(50%);
             background-color: #4caf50;
-            color: white;
+            color: white !important;
             padding: 15px;
             border-radius: 5px;
             z-index: ${Z_INDEX_BASE + 2};

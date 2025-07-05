@@ -24,7 +24,7 @@
                     flex: 1;
                 }
 
-                .quizzet-translator .header img {
+                .quizzet-translator img {
                     width: 17px;
                     height: 17px;
                     cursor: pointer;
@@ -66,10 +66,25 @@
                     border-top: 1px dashed #dfe0e3;
                     padding: 5px 15px;
                 }
+                .quizzet-translator .save {
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    padding: 10px 15px;
+                    background-color: #2187d5;
+                    color: white;
+                    border: none;
+                    border-radius: 0 0 10px 10px;
+                    cursor: pointer;
+                    gap: 8px;
+                }
+                .quizzet-translator .save:hover {
+                    background-color: #1a6bb0;
+                }
             </style>
             <div class="header">
                 <img src="./assets/volume-2.svg" alt="" />
-                <img src="./assets/star.svg" alt="" />
+
                 <div class="right">
                     <img src="./assets/settings.svg" alt="" />
                     <img src="./assets/x.svg" alt="" />
@@ -83,10 +98,7 @@
                     <p class="type">Verb</p>
                     <p class="content">hehehf sdfs jfghlsk</p>
                 </div>
-                <div class="">
-                    <p class="type">Verb</p>
-                    <p class="content">hehehf sdfs jfghlsk</p>
-                </div>
+                <button class="save"><img src="./assets/star.svg" alt="" />Lưu vào Flashcard</button>
             </footer>
         </div>
     </body>

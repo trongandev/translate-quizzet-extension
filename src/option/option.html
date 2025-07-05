@@ -219,6 +219,34 @@
         .form-group {
             margin-bottom: 10px;
         }
+        .profile {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 20px;
+            color: #333;
+        }
+        .profile img {
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            object-fit: cover;
+        }
+        .btn-danger {
+            background-color: #f44336;
+            color: white;
+            padding: 10px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: background 0.3s;
+            width: 100%;
+            margin-bottom: 15px;
+        }
+        .btn-danger:hover {
+            background-color: #d32f2f;
+        }
     </style>
     <body>
         <div class="container">
@@ -228,47 +256,49 @@
                 </span>
                 <h1>Quizzet Translation Settings</h1>
             </div>
+            <div class="profile">
+                <img src="https://placehold.co/400" alt="" />
+                <h3>Tên người dùng</h3>
+            </div>
+            <a href="https://www.quizzet.site/login" target="_blank" rel="noopener noreferrer">
+                <button class="btn-danger">Bạn chưa đăng nhập, bấm vào để đăng nhập</button>
+            </a>
 
             <h2 class="section-title">Ngôn ngữ đích muốn lưu vào flashcard trên trang web</h2>
             <div class="section language-settings">
                 <div class="form-group">
                     <select id="sourceLanguage">
                         <option value="english">Tiếng Anh</option>
-                        <option value="vietnamese">Tiếng Việt</option>
-                        <option value="french">Tiếng Pháp</option>
-                        <option value="german">Tiếng Đức</option>
-                        <option value="spanish">Tiếng Tây Ban Nha</option>
                         <option value="chinese">Tiếng Trung</option>
-                        <option value="korean">Tiếng Hàn</option>
-                        <option value="japanese">Tiếng Nhật</option>
+                        <option value="japan">Tiếng Nhật</option>
+                        <option value="korea">Tiếng Hàn</option>
+                        <option value="france">Tiếng Pháp</option>
+                        <option value="germany">Tiếng Đức</option>
                     </select>
                 </div>
             </div>
-
             <div class="section">
-                <div class="save-flashcard">
+                <div class="save-flashcard" style="display: flex; gap: 10px">
                     <div class="">
                         <h2 class="">Vị trí lưu flashcard</h2>
-                        <p>Bấm làm mới để đồng bộ hóa thông tin trên server</p>
+                        <p>Bấm làm mới để đồng bộ hóa thông tin trên server, cập nhật lại tài khoản mà người dùng đang sử dụng trên quizzet</p>
                     </div>
-                    <button title="Bấm làm mới để đồng bộ hóa thông tin trên server" id="btn-refresh">Làm mới</button>
+                    <div style="display: flex; gap: 10px; width: 150px">
+                        <button title="Bấm làm mới để đồng bộ hóa thông tin trên server" id="btn-refresh">Làm mới</button>
+                    </div>
                 </div>
                 <div class="form-group">
                     <select id="sourceFlashcard"></select>
                 </div>
             </div>
 
-            <div class="section">
+            <!-- <div class="section">
                 <h2 class="section-title">Chức năng</h2>
                 <div class="form-group">
                     <label for="translateShortcut">Mở popup</label>
                     <input type="text" id="translateShortcut" placeholder="e.g. Ctrl+I" value="Ctrl+I" disabled />
                 </div>
-                <div class="form-group">
-                    <label for="token">Token</label>
-                    <textarea type="text" id="token" placeholder="dán Token ở đây" value=""></textarea>
-                </div>
-            </div>
+            </div> -->
 
             <div class="buttons">
                 <button class="save-btn">Lưu</button>
