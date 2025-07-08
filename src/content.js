@@ -96,7 +96,7 @@ function getHTMLTemplate(translation) {
                     flex-direction: column;
                     gap: 8px;
                 }
-                footer p.type {
+                .quizzet-translator footer p.type {
                     color: #94acbf;
                     font-style: italic;
                     margin: 0;
@@ -107,26 +107,26 @@ function getHTMLTemplate(translation) {
                     font-style: normal;
                     font-size: 14px;
                     margin: 0;
+                    padding: 0;
                 }
                 .quizzet-translator footer div {
                     border-top: 1px dashed #dfe0e3;
                     padding: 5px 15px;
                 }
                 .quizzet-translator .save {
+                    border:none;
                     display: flex;
                     align-items: center;
                     justify-content: center;
-                    padding: 10px 15px;
-                    background-color: #2187d5;
-                    color: white;
-                    border: none;
+                    color: #1a6bb0;
                     border-radius: 0 0 10px 10px;
                     cursor: pointer;
                     gap: 8px;
                     font-size: 12px;
+                    background-color:rgba(26, 106, 176, 0.1);
                 }
                 .quizzet-translator .save:hover {
-                    background-color: #1a6bb0;
+                    background-color: rgba(26, 106, 176, 0.3);
                 }
             </style>
             <div class="header">

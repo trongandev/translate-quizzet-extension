@@ -7,32 +7,19 @@ Quizzet Translate Extension này cho phép người dùng dịch văn bản đã
 -   Phát hiện văn bản được chọn trên trang web.
 -   Hiển thị biểu tượng dịch thuật bên dưới từ đã chọn.
 -   Dịch văn bản đã chọn bằng API Google Translate.
--   Khi bấm vào đánh dấu (icon Star) thì sẽ tự động lưu vào từ điển lên trang quizzet.site
-
-## Cấu Trúc Dự Án
-
-```
-translation-extension
-├── src
-│   ├── content.js          # Logic phát hiện văn bản được chọn và hiển thị biểu tượng
-│   ├── background.js       # Quản lý tác vụ nền và tương tác API
-│   ├── popup
-│   │   ├── popup.html      # Cấu trúc HTML cho popup
-│   │   ├── popup.js        # Logic cho chức năng popup
-│   │   └── popup.css       # Kiểu dáng cho popup
-│   └── utils
-│       └── translator.js    # Các hàm tương tác với API Google Translate
-├── manifest.json           # Tệp cấu hình cho tiện ích mở rộng Chrome
-├── package.json            # Tệp cấu hình npm với các phụ thuộc
-└── README.md               # Tài liệu cho dự án
-```
+-   Khi bấm vào nút lưu vào flashcard thì sẽ tự động lưu vào từ điển lên trang quizzet.site
 
 ## Cài đặt
 
 1. Clone hoặc tải về repository này.
-2. Mở Chrome và điều hướng đến `chrome://extensions/`.
+   <img src="screenshots/img5.png"/>
+2. Mở Chrome và điều hướng đến `chrome://extensions/` hoặc [Click vào đây](chrome://extensions/)
+   <img src="screenshots/img4.png"/>
+
 3. Bật "Chế độ nhà phát triển" bằng cách bật công tắc ở góc trên bên phải.
+   <img src="screenshots/img3.png"/>
 4. Nhấp vào "Tải tiện ích đã giải nén" và chọn thư mục nơi bạn đã tải về hoặc clone repository này.
+   <img src="screenshots/img6.png"/>
 
 ## Cách Sử Dụng
 

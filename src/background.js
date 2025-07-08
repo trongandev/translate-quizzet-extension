@@ -432,9 +432,14 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
 // Kiểm tra khi extension khởi động hoặc cài đặt
 fetchTokens();
-chrome.runtime.onStartup.addListener(fetchTokens);
-chrome.runtime.onInstalled.addListener(fetchTokens);
+chrome.runtime.onStartup.addListener({
+    fetchTokens,
+    fetchProfile,
+    fetchFlashcard,
+});
 chrome.action.onClicked.addListener(fetchTokens);
-chrome.runtime.onStartup.addListener(checkUpdate);
-chrome.runtime.onInstalled.addListener(fetchProfile);
-chrome.runtime.onInstalled.addListener(fetchFlashcard);
+chrome.runtime.onInstalled.addListener({
+    fetchTokens,
+    fetchProfile,
+    fetchFlashcard,
+});
