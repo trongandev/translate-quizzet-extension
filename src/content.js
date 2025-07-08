@@ -364,7 +364,7 @@ function setupModalEventListeners(text) {
             saveButton.style.opacity = "0.5";
             return;
         }
-        textBtn.textContent = `Lưu vào ["${result.list_flashcard_id.name}"]`;
+        textBtn.textContent = `Lưu vào Flashcard`;
     });
     if (saveButton) {
         saveButton.addEventListener("click", function (e) {
@@ -377,7 +377,7 @@ function setupModalEventListeners(text) {
                 chrome.storage.local.get(["list_flashcard_id"], function (result) {
                     showNotification(`Đang lưu từ vựng vào ["${result.list_flashcard_id.name}"] `);
                     list_flashcard_id = result.list_flashcard_id.id;
-                    textBtn.textContent = `Đang lưu vào ["${result.list_flashcard_id.name}"]...`;
+                    textBtn.textContent = `Đang lưu...`;
                     if (!list_flashcard_id) {
                         showNotification("Vui lòng chọn flashcard trước khi lưu, vào setting để chọn flashcard");
                         saveButton.style.cursor = "pointer";
@@ -397,7 +397,7 @@ function setupModalEventListeners(text) {
                                 showNotification(`Lưu từ "${response.flashcard.title}" vào flashcard ["${result.list_flashcard_id.name}"] thành công`);
                                 saveButton.style.cursor = "pointer";
                                 saveButton.style.opacity = "1";
-                                textBtn.textContent = `Lưu vào ["${result.list_flashcard_id.name}"]`;
+                                textBtn.textContent = `Lưu vào Flashcard`;
                             }
                         }
                     );

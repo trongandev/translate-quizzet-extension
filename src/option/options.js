@@ -8,15 +8,16 @@ document.addEventListener("DOMContentLoaded", function () {
     const btnDanger = document.querySelector(".btn-danger");
 
     if (profile) {
-        chrome.storage.local.get(["token"], function (result) {
+        chrome.storage.local.get(["token", "profile"], function (result) {
             if (chrome.runtime.lastError) {
                 console.error("Error reading token:", chrome.runtime.lastError);
                 profile.innerHTML = "<h3>Bạn chưa đăng nhập</h3>";
                 btnDanger.style.display = "block";
             } else {
                 if (result.token) {
-                    profile.innerHTML = `<img src="https://placehold.co/400" alt="" />
-                                         <h3>Tên người dùng</h3>`;
+                    console.log(result);
+                    profile.innerHTML = `<img src=${result.profile.profilePicture} alt="" />
+                                         <h3>${result.profile.displayName}</h3>`;
                     btnDanger.style.display = "none";
                 } else {
                     profile.innerHTML = "<h3>Bạn chưa đăng nhập</h3>";

@@ -1,5 +1,5 @@
 const QUIZZET_BACKEND_API = "https://quizzet-be.vercel.app/api";
-const QUIZZET_FRONTEND_API = "https://quizzet.site"; // Local development API endpoint
+const QUIZZET_FRONTEND_API = "https://www.quizzet.site/"; // Local development API endpoint
 
 // const QUIZZET_BACKEND_API = "http://localhost:5000/api"; // Local development API endpoint
 // const QUIZZET_FRONTEND_API = "http://localhost:3000"; // Local development API endpoint
