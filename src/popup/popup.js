@@ -363,23 +363,28 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
     // thay đổi hình ảnh src của avatar
-    chrome.storage.local.get(["profile"], function (result) {
-        if (!result.profile) {
+    chrome.storage.local.get(["profile", "token"], async function (result) {
+        if (result.token == null) {
             profile.style.display = "none";
             noLogin.style.display = "flex";
-            showNotification("Chưa có thông tin người dùng");
-            return;
+            showNotification("Bạn chưa đăng nhập");
+        } else if (result.profile == null) {
+            noLogin.style.display = "none";
+            profileName.innerText = "Đang tải thông tin người dùng...";
+            avatar.setAttribute("src", "https://upload.wikimedia.org/wikipedia/commons/b/b1/Loading_icon.gif");
+            showNotification("Đang tải thông tin người dùng");
+        } else {
+            profile.style.display = "flex";
+            noLogin.style.display = "none";
+            avatar.setAttribute("src", result.profile.profilePicture);
+            avatar.setAttribute("alt", result.profile.displayName);
+            avatar.setAttribute("href", "https://www.quizzet.site/profile/" + result.profile._id);
+            avatar.setAttribute("target", "_blank");
+            profileName.textContent = result.profile.displayName;
+            profileName.setAttribute("href", "https://www.quizzet.site/profile/" + result.profile._id);
+            profileName.setAttribute("target", "_blank");
+            showNotification("Load thông tin người dùng thành công");
         }
-        profile.style.display = "flex";
-        noLogin.style.display = "none";
-        avatar.setAttribute("src", result.profile.profilePicture);
-        avatar.setAttribute("alt", result.profile.displayName);
-        avatar.setAttribute("href", "https://www.quizzet.site/profile/" + result.profile._id);
-        avatar.setAttribute("target", "_blank");
-        profileName.textContent = result.profile.displayName;
-        profileName.setAttribute("href", "https://www.quizzet.site/profile/" + result.profile._id);
-        profileName.setAttribute("target", "_blank");
-        showNotification("Load thông tin người dùng thành công");
     });
 
     // Sự kiện nhấn Enter trong textarea để dịch
