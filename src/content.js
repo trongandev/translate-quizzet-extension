@@ -7,6 +7,21 @@ const ICONS = {
     settings: chrome.runtime.getURL("../assets/settings.svg"),
     sparkles: chrome.runtime.getURL("../assets/sparkles.svg"),
 };
+const GOOGLE_TRANSLATE_API = "https://translate.googleapis.com/translate_a/single";
+const DETECT_LANGUAGE_LIMIT = 100; // Số ký tự tối đa để phát hiện ngôn ngữ
+async function detectLanguage(text) {
+    try {
+        // Use only a portion of text for detection to save bandwidth
+        const sampleText = text.slice(0, DETECT_LANGUAGE_LIMIT);
+        const url = `${GOOGLE_TRANSLATE_API}?client=gtx&sl=auto&tl=en&dt=t&q=${encodeURIComponent(sampleText)}`;
+        const response = await fetch(url);
+        const data = await response.json();
+        return data && data[2] ? data[2] : "auto";
+    } catch (error) {
+        console.error("Language detection error:", error);
+        return "auto"; // Default fallback
+    }
+}
 
 const MIN_MODAL_WIDTH = 180;
 const BUTTON_SIZE = 25;
@@ -102,8 +117,7 @@ function getHTMLTemplate(translation) {
                     margin: 0;
                     font-size: 13px;
                 }
-                .quizzet-translator footer p.content {
-                    color: #3b3b3b;
+                .quizzet-translator footer p {
                     font-style: normal;
                     font-size: 14px;
                     margin: 0;
@@ -123,6 +137,7 @@ function getHTMLTemplate(translation) {
                     cursor: pointer;
                     gap: 8px;
                     font-size: 12px;
+                    height: 38px;
                     background-color:rgba(26, 106, 176, 0.1);
                 }
                 .quizzet-translator .save:hover {
@@ -298,7 +313,7 @@ function requestTranslation(text) {
     }
 }
 
-function setupModalEventListeners(text) {
+async function setupModalEventListeners(text) {
     const closeButton = translationModal.querySelector(".close-button");
     if (closeButton) {
         closeButton.addEventListener("click", function (e) {
@@ -308,13 +323,13 @@ function setupModalEventListeners(text) {
     }
     const speakButton = translationModal.querySelector(".speak-button");
     if (speakButton) {
-        speakButton.addEventListener("click", function (e) {
+        speakButton.addEventListener("click", async function (e) {
             e.stopPropagation();
             showUI();
             showNotification("Đang phát âm");
             if (text) {
                 const utterance = new SpeechSynthesisUtterance(text);
-                utterance.lang = "en-US";
+                utterance.lang = (await detectLanguage(text)) || "en-US"; // Default to Vietnamese if detection fails
                 speechSynthesis.speak(utterance);
             }
         });

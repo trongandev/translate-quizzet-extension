@@ -1,28 +1,45 @@
 document.addEventListener("DOMContentLoaded", function () {
-    // Kiểm tra storage integrity trước
-    checkStorageIntegrity();
     const selectFlashcard = document.getElementById("sourceFlashcard");
     const sourceLanguage = document.getElementById("sourceLanguage");
     const btnRefresh = document.getElementById("btn-refresh");
     const profile = document.querySelector(".profile");
     const btnDanger = document.querySelector(".btn-danger");
+    const btnRefreshPage = document.querySelector("#refresh");
+    const feature = document.querySelector(".feature");
+    if (btnDanger) {
+        btnDanger.addEventListener("click", function () {
+            window.open("https://www.quizzet.site/login", "_blank");
+            btnDanger.style.display = "none";
+            btnRefreshPage.style.display = "block";
+        });
+    }
+    if (btnRefreshPage) {
+        btnRefreshPage.addEventListener("click", function () {
+            chrome.runtime.sendMessage({ action: "refresh" }, function (response) {
+                document.location.reload();
+            });
+        });
+    }
 
     if (profile) {
-        chrome.storage.local.get(["token", "profile"], function (result) {
-            if (chrome.runtime.lastError) {
-                console.error("Error reading token:", chrome.runtime.lastError);
+        chrome.runtime.sendMessage({ action: "refresh" }, function (response) {
+            if (response.ok) {
+                profile.innerHTML = `<img src=${response.user.profilePicture} alt="" />
+                                         <h3>${response.user.displayName}</h3>`;
+                btnDanger.style.display = "none";
+                feature.style.display = "block";
+
+                response.listFlashCards.forEach((item) => {
+                    const option = document.createElement("option");
+                    option.value = item._id;
+                    option.textContent = `${item.title} | ${item.language.toUpperCase()}`;
+                    selectFlashcard.appendChild(option);
+                });
+
+                selectFlashcard.value = response.listFlashCards[0]._id;
+            } else {
                 profile.innerHTML = "<h3>Bạn chưa đăng nhập</h3>";
                 btnDanger.style.display = "block";
-            } else {
-                if (result.token) {
-                    console.log(result);
-                    profile.innerHTML = `<img src=${result.profile.profilePicture} alt="" />
-                                         <h3>${result.profile.displayName}</h3>`;
-                    btnDanger.style.display = "none";
-                } else {
-                    profile.innerHTML = "<h3>Bạn chưa đăng nhập</h3>";
-                    btnDanger.style.display = "block";
-                }
             }
         });
     }
@@ -126,7 +143,7 @@ function addAppendChildOptionFlashcard(selectFlashcard) {
             flashcardList.forEach((item) => {
                 const option = document.createElement("option");
                 option.value = item._id;
-                option.textContent = `${item.title} | ${item.language} | ${item.flashcards.length == 0 ? "Chưa có từ vựng" : item.flashcards.length + " từ"} `;
+                option.textContent = `${item.title} | ${item.language.toUpperCase()}`;
                 selectFlashcard.appendChild(option);
             });
 
@@ -158,7 +175,7 @@ function addAppendChildOptionFlashcard(selectFlashcard) {
                 }
             });
         } else {
-            showNotification("Không có flashcard nào được lưu trữ");
+            showNotification("Không có flashcard nào được lưu trữ, bạn chưa đăng nhập");
             // Handle the case where there are no flashcards available
             selectFlashcard.innerHTML = "<option value=''>No flashcards available</option>";
         }
@@ -174,70 +191,14 @@ function setDefaultFlashcard(selectFlashcard, flashcardList) {
         selectFlashcard.value = defaultId;
 
         // Save to storage with error handling
-        chrome.storage.local.set(
-            {
-                list_flashcard_id: {
-                    id: defaultId,
-                    name: defaultName,
-                },
+        chrome.storage.local.set({
+            list_flashcard_id: {
+                id: defaultId,
+                name: defaultName,
             },
-            function () {
-                if (chrome.runtime.lastError) {
-                    console.error("Error saving default flashcard:", chrome.runtime.lastError);
-                    showNotification("Lỗi khi lưu flashcard mặc định!");
-                } else {
-                    console.log("Successfully saved default flashcard:", defaultName);
-                    showNotification("Đã chọn flashcard đầu tiên: " + defaultName);
-                }
-            }
-        );
+        });
     } else {
         showNotification("Không có flashcard nào hiện tại");
         console.log("No flashcards available to set as default");
     }
-}
-
-function checkStorageIntegrity() {
-    console.log("Checking storage integrity...");
-
-    // Kiểm tra tất cả các keys quan trọng
-    chrome.storage.local.get(["listFlashCards", "list_flashcard_id", "target_language"], function (result) {
-        if (chrome.runtime.lastError) {
-            console.error("Error checking storage integrity:", chrome.runtime.lastError);
-            return;
-        }
-
-        console.log("Current storage state:", result);
-
-        // Validate data integrity
-        if (result.listFlashCards && result.list_flashcard_id) {
-            const flashcardExists = result.listFlashCards.find((item) => item._id === result.list_flashcard_id.id);
-            if (!flashcardExists) {
-                console.warn("Selected flashcard no longer exists in the list, will reset to default");
-                showNotification("Dữ liệu không nhất quán được phát hiện - flashcard đã chọn không còn tồn tại");
-                // Remove invalid selection
-                chrome.storage.local.remove(["list_flashcard_id"], function () {
-                    if (chrome.runtime.lastError) {
-                        console.error("Error removing invalid flashcard selection:", chrome.runtime.lastError);
-                    }
-                });
-            }
-        }
-
-        // Set default target language if missing
-        if (!result.target_language) {
-            chrome.storage.local.set({ target_language: "english" }, function () {
-                if (chrome.runtime.lastError) {
-                    console.error("Error setting default target_language:", chrome.runtime.lastError);
-                } else {
-                    console.log("Set default target_language to english");
-                }
-            });
-        }
-
-        // Check if we have critical data missing
-        if (!result.listFlashCards || result.listFlashCards.length === 0) {
-            showNotification("Không tìm thấy dữ liệu flashcard. Hãy thử làm mới hoặc khôi phục dữ liệu.");
-        }
-    });
 }

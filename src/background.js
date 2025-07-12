@@ -319,19 +319,58 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         });
         return true;
     }
+    if (request.action === "refresh") {
+        fetchTokens()
+            .then((result) => {
+                console.log("Refresh response:", result);
+                sendResponse(result);
+            })
+            .catch((error) => {
+                console.error("Refresh error:", error);
+                sendResponse({ ok: false, error: error.message });
+            });
+        return true; // Quan trọng: cho biết response sẽ async
+    }
 });
 
-chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {});
-
+// Sửa lại hàm fetchTokens để return Promise
 function fetchTokens() {
-    chrome.cookies.get({ url: QUIZZET_FRONTEND_API, name: "token" }, (cookie) => {
-        if (cookie) {
-            console.log(`Token for ${QUIZZET_FRONTEND_API}:`, cookie.value);
-            chrome.storage.local.set({ token: cookie.value });
-        } else {
-            console.log(`No token cookie found for ${QUIZZET_FRONTEND_API}`);
-            chrome.storage.local.set({ token: null });
-        }
+    return new Promise((resolve, reject) => {
+        chrome.cookies.get({ url: QUIZZET_FRONTEND_API, name: "token" }, (cookie) => {
+            if (cookie) {
+                console.log(`Token for ${QUIZZET_FRONTEND_API}:`, cookie.value);
+                chrome.storage.local.set({ token: cookie.value });
+
+                fetch(`${QUIZZET_BACKEND_API}/list-flashcards/exten`, {
+                    headers: {
+                        Authorization: `Bearer ${cookie.value}`,
+                    },
+                })
+                    .then((response) => response.json())
+                    .then((data) => {
+                        if (data.ok) {
+                            chrome.storage.local.set({ profile: data.user });
+                            chrome.storage.local.set({ listFlashCards: data.listFlashCards });
+                            chrome.storage.local.set({ list_flashcard_id: { id: data.listFlashCards[0]._id, name: data.listFlashCards[0].title } });
+                            chrome.storage.local.set({ target_language: data.listFlashCards[0].language });
+                            resolve(data); // Return data thành công
+                        } else {
+                            resolve({ ok: false, message: "API response not ok" });
+                        }
+                    })
+                    .catch((error) => {
+                        console.error("Profile fetch error:", error);
+                        reject(error);
+                    });
+            } else {
+                console.log(`No token cookie found for ${QUIZZET_FRONTEND_API}`);
+                chrome.storage.local.set({ token: null });
+                chrome.storage.local.set({ profile: null });
+                chrome.storage.local.set({ listFlashCards: null });
+                chrome.storage.local.set({ list_flashcard_id: null });
+                resolve({ ok: false, message: "No token found" });
+            }
+        });
     });
 }
 
@@ -368,78 +407,21 @@ function checkUpdate() {
         .catch(() => {}); // Bỏ qua lỗi
 }
 
-async function fetchProfile() {
-    chrome.storage.local.get(["token"], (result) => {
-        if (result.token) {
-            fetch(`${QUIZZET_BACKEND_API}/profile`, {
-                headers: {
-                    Authorization: `Bearer ${result.token}`,
-                },
-            })
-                .then((response) => response.json())
-                .then((data) => {
-                    chrome.storage.local.set({ profile: data.user });
-                })
-                .catch((error) => {
-                    console.error("Profile fetch error:", error);
-                });
-        } else {
-            chrome.storage.local.set({ profile: null });
-        }
-    });
-}
-
-async function fetchFlashcard() {
-    chrome.storage.local.get(["token"], (result) => {
-        if (result.token) {
-            fetch(`${QUIZZET_BACKEND_API}/list-flashcards`, {
-                headers: {
-                    Authorization: `Bearer ${result.token}`,
-                },
-            })
-                .then((response) => response.json())
-                .then((data) => {
-                    chrome.storage.local.set({ listFlashCards: data.listFlashCards });
-                    chrome.storage.local.set({ list_flashcard_id: { id: data.listFlashCards[0]._id, name: data.listFlashCards[0].title } });
-                    chrome.storage.local.set({ target_language: data.listFlashCards[0].language });
-                    return data.listFlashCards;
-                })
-                .catch((error) => {
-                    console.error("Profile fetch error:", error);
-                });
-        } else {
-            chrome.storage.local.set({ listFlashCards: null });
-            chrome.storage.local.set({ list_flashcard_id: null });
-        }
-    });
-}
-
-chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-    if (request.action === "refresh") {
-        fetchProfile();
-        const data = fetchFlashcard();
-        sendResponse(data);
-    }
-});
-
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     if (message.action === "fetchTokens") {
         fetchTokens();
-        fetchProfile();
-        fetchFlashcard();
     }
 });
 
 // Kiểm tra khi extension khởi động hoặc cài đặt
-fetchTokens();
-chrome.runtime.onStartup.addListener({
-    fetchTokens,
-    fetchProfile,
-    fetchFlashcard,
-});
 chrome.action.onClicked.addListener(fetchTokens);
-chrome.runtime.onInstalled.addListener({
-    fetchTokens,
-    fetchProfile,
-    fetchFlashcard,
+chrome.runtime.onInstalled.addListener(() => {
+    fetchTokens();
+    checkUpdate();
+});
+chrome.runtime.onInstalled.addListener();
+chrome.runtime.onInstalled.addListener(checkUpdate);
+chrome.runtime.onStartup.addListener(() => {
+    fetchTokens();
+    checkUpdate();
 });

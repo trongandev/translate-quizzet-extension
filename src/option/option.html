@@ -247,6 +247,16 @@
         .btn-danger:hover {
             background-color: #d32f2f;
         }
+        #refresh {
+            display: none;
+            width: 100%;
+            background-color: #4285f4;
+            color: white;
+            margin-bottom: 20px;
+        }
+        .feature {
+            display: none;
+        }
     </style>
     <body>
         <div class="container">
@@ -260,48 +270,40 @@
                 <img src="https://placehold.co/400" alt="" />
                 <h3>Tên người dùng</h3>
             </div>
-            <a href="https://www.quizzet.site/login" target="_blank" rel="noopener noreferrer">
-                <button class="btn-danger">Bạn chưa đăng nhập, bấm vào để đăng nhập</button>
-            </a>
+            <button class="btn-danger">Bấm vào để đăng nhập</button>
+            <button title="Bấm làm mới để đồng bộ hóa thông tin trên server" id="refresh">Làm mới trang để cập nhật</button>
 
-            <h2 class="section-title">Ngôn ngữ đích muốn lưu vào flashcard trên trang web</h2>
-            <div class="section language-settings">
-                <div class="form-group">
-                    <select id="sourceLanguage">
-                        <option value="english">Tiếng Anh</option>
-                        <option value="chinese">Tiếng Trung</option>
-                        <option value="japan">Tiếng Nhật</option>
-                        <option value="korea">Tiếng Hàn</option>
-                        <option value="france">Tiếng Pháp</option>
-                        <option value="germany">Tiếng Đức</option>
-                    </select>
-                </div>
-            </div>
-            <div class="section">
-                <div class="save-flashcard" style="display: flex; gap: 10px">
-                    <div class="">
-                        <h2 class="">Vị trí lưu flashcard</h2>
-                        <p>Bấm làm mới để đồng bộ hóa thông tin trên server, cập nhật lại tài khoản mà người dùng đang sử dụng trên quizzet</p>
-                    </div>
-                    <div style="display: flex; gap: 10px; width: 150px">
-                        <button title="Bấm làm mới để đồng bộ hóa thông tin trên server" id="btn-refresh">Làm mới</button>
+            <div class="feature">
+                <h2 class="section-title">Ngôn ngữ đích muốn lưu vào flashcard trên trang web</h2>
+                <div class="section language-settings">
+                    <div class="form-group">
+                        <select id="sourceLanguage">
+                            <option value="english">Tiếng Anh</option>
+                            <option value="chinese">Tiếng Trung</option>
+                            <option value="japan">Tiếng Nhật</option>
+                            <option value="korea">Tiếng Hàn</option>
+                            <option value="france">Tiếng Pháp</option>
+                            <option value="germany">Tiếng Đức</option>
+                        </select>
                     </div>
                 </div>
-                <div class="form-group">
-                    <select id="sourceFlashcard"></select>
+                <div class="section">
+                    <div class="save-flashcard" style="display: flex; gap: 10px">
+                        <div class="">
+                            <h2 class="">Vị trí lưu flashcard</h2>
+                            <p>Bấm làm mới để đồng bộ hóa thông tin trên server, cập nhật lại tài khoản mà người dùng đang sử dụng trên quizzet</p>
+                        </div>
+                        <div style="display: flex; gap: 10px; width: 150px">
+                            <button title="Bấm làm mới để đồng bộ hóa thông tin trên server" id="btn-refresh">Làm mới</button>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <select id="sourceFlashcard"></select>
+                    </div>
                 </div>
-            </div>
-
-            <!-- <div class="section">
-                <h2 class="section-title">Chức năng</h2>
-                <div class="form-group">
-                    <label for="translateShortcut">Mở popup</label>
-                    <input type="text" id="translateShortcut" placeholder="e.g. Ctrl+I" value="Ctrl+I" disabled />
+                <div class="buttons">
+                    <button class="save-btn">Lưu</button>
                 </div>
-            </div> -->
-
-            <div class="buttons">
-                <button class="save-btn">Lưu</button>
             </div>
         </div>
 
