@@ -284,25 +284,27 @@ function requestTranslation(text) {
     translationModal.innerHTML = LOADER_UI;
 
     try {
-        chrome.runtime.sendMessage(
-            {
-                action: "translate",
-                text: text,
-                targetLanguage: "vi", // Default target language
-            },
-            function (response) {
-                if (response && !response.error) {
-                    translationModal.innerHTML = getHTMLTemplate(response.translation);
-                    setupModalEventListeners(text);
-                } else {
-                    translationModal.innerHTML = `
-                        <div style="padding: 15px; text-align: center;">
-                            <p>Translation failed: ${response?.error || "Unknown error"}</p>
-                        </div>
-                    `;
+        chrome.storage.local.get(["target_language"], function (result) {
+            chrome.runtime.sendMessage(
+                {
+                    action: "translate",
+                    text: text,
+                    targetLanguage: result.target_language, // Default target language
+                },
+                function (response) {
+                    if (response && !response.error) {
+                        translationModal.innerHTML = getHTMLTemplate(response.translation);
+                        setupModalEventListeners(text);
+                    } else {
+                        translationModal.innerHTML = `
+                            <div style="padding: 15px; text-align: center;">
+                                <p>Translation failed: ${response?.error || "Unknown error"}</p>
+                            </div>
+                        `;
+                    }
                 }
-            }
-        );
+            );
+        });
     } catch (error) {
         console.error("Translation request error:", error);
         translationModal.innerHTML = `
@@ -329,7 +331,7 @@ async function setupModalEventListeners(text) {
             showNotification("Đang phát âm");
             if (text) {
                 const utterance = new SpeechSynthesisUtterance(text);
-                utterance.lang = (await detectLanguage(text)) || "en-US"; // Default to Vietnamese if detection fails
+                utterance.lang = (await detectLanguage(text)) || "en-US";
                 speechSynthesis.speak(utterance);
             }
         });
@@ -390,8 +392,8 @@ async function setupModalEventListeners(text) {
             if (text) {
                 // Save translation to local storage or send to server
                 chrome.storage.local.get(["list_flashcard_id"], function (result) {
-                    showNotification(`Đang lưu từ vựng vào ["${result.list_flashcard_id.name}"] `);
-                    list_flashcard_id = result.list_flashcard_id.id;
+                    showNotification(`Đang lưu từ vựng vào ["${result.list_flashcard_id.title}"] `);
+                    list_flashcard_id = result.list_flashcard_id._id;
                     textBtn.textContent = `Đang lưu...`;
                     if (!list_flashcard_id) {
                         showNotification("Vui lòng chọn flashcard trước khi lưu, vào setting để chọn flashcard");
@@ -407,9 +409,9 @@ async function setupModalEventListeners(text) {
                         },
                         function (response) {
                             if (!response.ok) {
-                                showNotification("Lưu từ vựng thất bại");
+                                showNotification(response.message);
                             } else {
-                                showNotification(`Lưu từ "${response.flashcard.title}" vào flashcard ["${result.list_flashcard_id.name}"] thành công`);
+                                showNotification(`Lưu từ "${response.flashcard.title}" vào flashcard ["${result.list_flashcard_id.title}"] thành công`);
                                 saveButton.style.cursor = "pointer";
                                 saveButton.style.opacity = "1";
                                 textBtn.textContent = `Lưu vào Flashcard`;

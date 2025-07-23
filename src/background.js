@@ -70,9 +70,9 @@ function OptimizedPrompt(text, target_language) {
     `);
 }
 
-function optimizePronptAIEnhance(text) {
+function optimizePronptAIEnhance(text, target_language) {
     return (optimizedPrompt = `
-        Tôi muốn bạn dịch đoạn văn sau sang tiếng Việt. Vui lòng đảm bảo bản dịch truyền tải chính xác ý nghĩa và ngữ điệu gốc.
+        Tôi muốn bạn dịch đoạn văn sau sang ${target_language}. Vui lòng đảm bảo bản dịch truyền tải chính xác ý nghĩa và ngữ điệu gốc.
         Lưu ý: Trả về kết quả KHÔNG kèm theo bất kỳ giải thích nào:\n
         ${text}`);
 }
@@ -275,15 +275,15 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     if (request.action === "save-translation") {
-        chrome.storage.local.get(["token", "list_flashcard_id", "target_language"], (result) => {
-            const optimizedPrompt = OptimizedPrompt(request.text, result.target_language);
+        chrome.storage.local.get(["token", "list_flashcard_id"], (result) => {
+            const optimizedPrompt = OptimizedPrompt(request.text, result.list_flashcard_id.language);
             fetch(`${QUIZZET_BACKEND_API}/flashcards/create-ai`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
                     Authorization: `Bearer ${result.token}`,
                 },
-                body: JSON.stringify({ prompt: optimizedPrompt, list_flashcard_id: result.list_flashcard_id.id, language: result.target_language }),
+                body: JSON.stringify({ prompt: optimizedPrompt, list_flashcard_id: result.list_flashcard_id._id, language: result.list_flashcard_id.language }),
             })
                 .then((response) => response.json())
                 .then((data) => {
@@ -300,7 +300,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
     if (request.action === "ai-enhance") {
         chrome.storage.local.get(["token", "target_language"], (result) => {
-            const optimizedPrompt = optimizePronptAIEnhance(request.text);
+            const optimizedPrompt = optimizePronptAIEnhance(request.text, result.target_language);
             fetch(`${QUIZZET_BACKEND_API}/flashcards/translate`, {
                 method: "POST",
                 headers: {
@@ -351,8 +351,7 @@ function fetchTokens() {
                         if (data.ok) {
                             chrome.storage.local.set({ profile: data.user });
                             chrome.storage.local.set({ listFlashCards: data.listFlashCards });
-                            chrome.storage.local.set({ list_flashcard_id: { id: data.listFlashCards[0]._id, name: data.listFlashCards[0].title } });
-                            chrome.storage.local.set({ target_language: data.listFlashCards[0].language });
+                            chrome.storage.local.set({ list_flashcard_id: data.listFlashCards[0] });
                             resolve(data); // Return data thành công
                         } else {
                             resolve({ ok: false, message: "API response not ok" });
