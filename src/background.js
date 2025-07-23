@@ -374,29 +374,29 @@ function fetchTokens() {
 }
 
 function checkUpdate() {
-    fetch("https://raw.githubusercontent.com/angutboiz/translate-quizzet-extension/refs/heads/main/data/version.json")
+    fetch("https://raw.githubusercontent.com/trongandev/translate-quizzet-extension/refs/heads/main/data/version.json")
         .then((response) => response.json())
         .then((data) => {
             const currentVersion = chrome.runtime.getManifest().version;
 
             if (data.version > currentVersion) {
+                console.log(`New version available: ${data.version} (current: ${currentVersion})`);
+                // Hiển thị thông báo toast
+                chrome.notifications.create("update_notification", {
+                    type: "basic",
+                    iconUrl: "../assets/icons.png",
+                    title: "Cập nhật mới!",
+                    message: `Phiên bản mới (${data.version}) đã có sẵn. Nhấp vào đây để cập nhật.`,
+                    priority: 2,
+                });
                 chrome.storage.local.get(["update_notified"], (result) => {
                     if (!result.update_notified) {
                         chrome.storage.local.set({ update_notified: true });
 
-                        // Hiển thị thông báo toast
-                        chrome.notifications.create("update_notification", {
-                            type: "basic",
-                            iconUrl: "assets/icons.png",
-                            title: "Cập nhật mới!",
-                            message: `Phiên bản mới (${data.version}) đã có sẵn. Nhấp vào đây để cập nhật.`,
-                            priority: 2,
-                        });
-
                         // Mở trang cập nhật khi người dùng bấm vào thông báo
                         chrome.notifications.onClicked.addListener((notificationId) => {
                             if (notificationId === "update_notification") {
-                                chrome.tabs.create({ url: "https://github.com/angutboiz/translate-quizzet-extension" });
+                                chrome.tabs.create({ url: "https://github.com/trongandev/translate-quizzet-extension" });
                             }
                         });
                     }
@@ -413,14 +413,8 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 });
 
 // Kiểm tra khi extension khởi động hoặc cài đặt
-chrome.action.onClicked.addListener(fetchTokens);
-chrome.runtime.onInstalled.addListener(() => {
-    fetchTokens();
-    checkUpdate();
-});
-chrome.runtime.onInstalled.addListener();
+// chrome.action.onClicked.addListener(fetchTokens);
+// chrome.runtime.onInstalled.addListener(fetchTokens);
+// chrome.runtime.onStartup.addListener(checkUpdate);
 chrome.runtime.onInstalled.addListener(checkUpdate);
-chrome.runtime.onStartup.addListener(() => {
-    fetchTokens();
-    checkUpdate();
-});
+// chrome.runtime.onStartup.addListener(fetchTokens);

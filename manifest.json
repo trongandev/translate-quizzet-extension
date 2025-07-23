@@ -1,19 +1,21 @@
 {
     "manifest_version": 3,
     "name": "Quizzet Translation Extension",
-    "version": "1.0",
+    "version": "1.0.5",
     "description": "Một công cụ giúp dịch thuật cũng như lưu lại từ vựng nhanh chóng trên trang quizzet.site",
-    "permissions": ["activeTab", "cookies", "storage", "scripting", "notifications", "storage", "tabs"],
+    "permissions": ["activeTab", "cookies", "storage", "scripting", "notifications", "tabs"],
     "background": {
         "service_worker": "src/background.js"
     },
     "action": {
-        "default_popup": "src/popup/popup.html"
+        "default_popup": "src/popup/popup.html",
+        "default_icon": "assets/icons.png"
     },
     "content_scripts": [
         {
             "matches": ["<all_urls>"],
-            "js": ["src/content.js"]
+            "js": ["src/content.js"],
+            "run_at": "document_idle"
         }
     ],
     "icons": {
