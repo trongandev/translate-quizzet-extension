@@ -6,66 +6,77 @@ const ICONS = {
     star: chrome.runtime.getURL("../assets/star-fill.svg"),
     settings: chrome.runtime.getURL("../assets/settings.svg"),
     sparkles: chrome.runtime.getURL("../assets/sparkles.svg"),
-};
-const GOOGLE_TRANSLATE_API = "https://translate.googleapis.com/translate_a/single";
-const DETECT_LANGUAGE_LIMIT = 100; // Số ký tự tối đa để phát hiện ngôn ngữ
+    bookOpen: chrome.runtime.getURL("../assets/book-open.svg"),
+}
+const GOOGLE_TRANSLATE_API = "https://translate.googleapis.com/translate_a/single"
+const DETECT_LANGUAGE_LIMIT = 100 // Số ký tự tối đa để phát hiện ngôn ngữ
 async function detectLanguage(text) {
     try {
         // Use only a portion of text for detection to save bandwidth
-        const sampleText = text.slice(0, DETECT_LANGUAGE_LIMIT);
-        const url = `${GOOGLE_TRANSLATE_API}?client=gtx&sl=auto&tl=en&dt=t&q=${encodeURIComponent(sampleText)}`;
-        const response = await fetch(url);
-        const data = await response.json();
-        return data && data[2] ? data[2] : "auto";
+        const sampleText = text.slice(0, DETECT_LANGUAGE_LIMIT)
+        const url = `${GOOGLE_TRANSLATE_API}?client=gtx&sl=auto&tl=en&dt=t&q=${encodeURIComponent(sampleText)}`
+        const response = await fetch(url)
+        const data = await response.json()
+        return data && data[2] ? data[2] : "auto"
     } catch (error) {
-        console.error("Language detection error:", error);
-        return "auto"; // Default fallback
+        console.error("Language detection error:", error)
+        return "auto" // Default fallback
     }
 }
 
-const MIN_MODAL_WIDTH = 180;
-const BUTTON_SIZE = 25;
-const Z_INDEX_BASE = 10000;
+const MIN_MODAL_WIDTH = 180
+const BUTTON_SIZE = 25
+const Z_INDEX_BASE = 10000
 
 // Create UI elements
 function createTranslationButton() {
-    const button = document.createElement("button");
-    button.className = "custom-button";
-    button.style.position = "absolute";
-    button.style.border = "2px solid #ccc";
-    button.style.fontSize = "16px";
-    button.style.borderRadius = "5px";
-    button.style.width = `${BUTTON_SIZE}px`;
-    button.style.height = `${BUTTON_SIZE}px`;
-    button.style.display = "none";
-    button.style.cursor = "pointer";
-    button.style.zIndex = Z_INDEX_BASE.toString();
-    button.style.alignItems = "center";
-    button.style.justifyContent = "center";
-    button.style.backgroundColor = "#fff";
-    button.style.backgroundImage = `url('${ICONS.main}')`;
-    button.style.backgroundSize = "cover";
-    button.style.backgroundRepeat = "no-repeat";
-    return button;
+    const button = document.createElement("button")
+    button.className = "custom-button"
+    button.style.position = "absolute"
+    button.style.border = "2px solid #ccc"
+    button.style.fontSize = "16px"
+    button.style.borderRadius = "5px"
+    button.style.width = `${BUTTON_SIZE}px`
+    button.style.height = `${BUTTON_SIZE}px`
+    button.style.display = "none"
+    button.style.cursor = "pointer"
+    button.style.zIndex = Z_INDEX_BASE.toString()
+    button.style.alignItems = "center"
+    button.style.justifyContent = "center"
+    button.style.backgroundColor = "#fff"
+    button.style.backgroundImage = `url('${ICONS.main}')`
+    button.style.backgroundSize = "cover"
+    button.style.backgroundRepeat = "no-repeat"
+    return button
 }
 
 function createTranslationModal() {
-    const modal = document.createElement("div");
-    modal.className = "quizzet-translator";
-    modal.style.position = "absolute";
-    modal.style.zIndex = (Z_INDEX_BASE + 1).toString();
-    modal.style.display = "none";
-    modal.style.backgroundColor = "#fff";
-    modal.style.borderRadius = "10px";
-    modal.style.boxShadow = "rgba(14, 30, 37, 0.12) 0px 2px 4px 0px, rgba(14, 30, 37, 0.32) 0px 2px 16px 0px";
-    modal.style.fontFamily = "Segoe UI, Tahoma, Geneva, Verdana, sans-serif";
-    modal.style.minHeight = "80px";
-    return modal;
+    // Host element: used for positioning on the page. Keep minimal styles here so
+    // page CSS doesn't leak into our UI.
+    const host = document.createElement("div")
+    host.className = "quizzet-translator-host"
+    host.style.position = "absolute"
+
+    host.style.zIndex = (Z_INDEX_BASE + 1).toString()
+    host.style.display = "none"
+    host.style.minHeight = "80px"
+
+    // Attach shadow root to isolate styles and markup from the page.
+    const shadow = host.attachShadow({ mode: "open" })
+
+    // Empty container inside shadow; we'll inject our template into shadowRoot
+    const container = document.createElement("div")
+    container.className = "quizzet-translator"
+    container.style.width = "100%"
+    shadow.appendChild(container)
+
+    return host
 }
 
 // HTML templates
-function getHTMLTemplate(translation) {
-    const matches = translation?.matches || [{ translation: "No translation available" }, { translation: "" }, { translation: "" }];
+function getHTMLTemplate(response) {
+    const { translation, profile, list_flashcard_id } = response
+    const matches = translation?.matches || [{ translation: "No translation available" }, { translation: "" }, { translation: "" }]
 
     return `
      <div class="quizzet-translator">
@@ -76,6 +87,7 @@ function getHTMLTemplate(translation) {
                     box-shadow: rgba(14, 30, 37, 0.12) 0px 2px 4px 0px, rgba(14, 30, 37, 0.32) 0px 2px 16px 0px;
                     border-radius: 10px;
                     font-family: Segoe UI, Tahoma, Geneva, Verdana, sans-serif;
+                    background-color: #fff;
                 }
                 .quizzet-translator .header {
                     display: flex;
@@ -110,6 +122,7 @@ function getHTMLTemplate(translation) {
                     display: flex;
                     flex-direction: column;
                     gap: 8px;
+                    padding-top: 5px;
                 }
                 .quizzet-translator footer p.type {
                     color: #94acbf;
@@ -123,12 +136,12 @@ function getHTMLTemplate(translation) {
                     margin: 0;
                     padding: 0;
                 }
-                .quizzet-translator footer div {
+                .quizzet-translator footer .part-of-speech {
                     border-top: 1px dashed #dfe0e3;
-                    padding: 5px 15px;
+                    padding: 10px ;
                 }
                 .quizzet-translator .save {
-                    border:none;
+                    border: none;
                     display: flex;
                     align-items: center;
                     justify-content: center;
@@ -138,10 +151,41 @@ function getHTMLTemplate(translation) {
                     gap: 8px;
                     font-size: 12px;
                     height: 38px;
-                    background-color:rgba(26, 106, 176, 0.1);
+                    background-color: rgba(26, 106, 176, 0.1);
                 }
                 .quizzet-translator .save:hover {
                     background-color: rgba(26, 106, 176, 0.3);
+                }
+                .quizzet-translator .avatar {
+                    display: flex;
+                    align-items: center;
+                    gap: 10px;
+                      color: #1a1f2a;
+                }
+                .quizzet-translator .avatar .profile-picture {
+                    border-radius: 50%;
+                    width: 38px;
+                    height: 38px;
+                    object-fit: cover;
+                }
+                .quizzet-translator .avatar h2 {
+                    font-size: 14px;
+                    font-weight: 400;
+                    margin: 0;
+                }
+                        .quizzet-translator .avatar .source-flashcard {
+                            display:flex;
+                            align-items:center;
+                            gap: 5px;
+                        }
+
+                .quizzet-translator select {
+                    margin-top: 4px;
+                    width: 100%;
+                    padding: 6px;
+                    border: 1px solid #ddd;
+                    border-radius: 4px;
+                    font-size: 12px;
                 }
             </style>
             <div class="header">
@@ -158,8 +202,21 @@ function getHTMLTemplate(translation) {
             <footer>
                 ${
                     matches[1]?.partOfSpeech
-                        ? `<div class="">
+                        ? `<div class=" part-of-speech">
                             <p class="type">${matches[1]?.partOfSpeech}</p>
+                        </div>`
+                        : ""
+                }
+                ${
+                    profile
+                        ? ` <div class="avatar  part-of-speech">
+                            <img class="profile-picture" src="${profile.profilePicture}" alt="" />
+                            <div class="">
+                                <h2>${profile.displayName}</h2>
+                                <h2 class="source-flashcard">
+                                    <img src="${ICONS.bookOpen}" width="10px" heigth="10px" /> ${list_flashcard_id.title + " | " + list_flashcard_id.language}
+                                </h2>
+                            </div>
                         </div>`
                         : ""
                 }
@@ -168,7 +225,7 @@ function getHTMLTemplate(translation) {
             </footer>
         </div>
       
-    `;
+    `
 }
 
 const LOADER_UI = `
@@ -182,6 +239,7 @@ const LOADER_UI = `
                     display: flex;
                     justify-content: center;
                     align-items: center;
+                     background-color: #fff;
                 }
                 .spinner-container-quizzet .spinner {
                     --clr: #2187d5;
@@ -227,61 +285,66 @@ const LOADER_UI = `
             </style>
         </div>
     </div>
-`;
+`
 
 // Create and append UI elements
-const customButton = createTranslationButton();
-const translationModal = createTranslationModal();
-document.body.appendChild(customButton);
-document.body.appendChild(translationModal);
+const customButton = createTranslationButton()
+const translationModal = createTranslationModal()
+document.body.appendChild(customButton)
+document.body.appendChild(translationModal)
 
 // Helper functions
 function positionButtonAtSelection() {
-    const selection = window.getSelection();
-    if (!selection.rangeCount) return false;
+    const selection = window.getSelection()
+    if (!selection.rangeCount) return false
 
-    const range = selection.getRangeAt(0);
-    const rect = range.getBoundingClientRect();
+    const range = selection.getRangeAt(0)
+    const rect = range.getBoundingClientRect()
 
     // Calculate center position of the selection
-    const selectionCenter = rect.left + rect.width / 2;
+    const selectionCenter = rect.left + rect.width / 2
 
     // Calculate button position (centered below selection)
-    const buttonLeft = selectionCenter - BUTTON_SIZE / 2 + window.scrollX;
-    const buttonTop = rect.bottom + window.scrollY + 5;
+    const buttonLeft = selectionCenter - BUTTON_SIZE / 2 + window.scrollX
+    const buttonTop = rect.bottom + window.scrollY + 5
 
     // Position and show the custom button
-    customButton.style.left = `${buttonLeft}px`;
-    customButton.style.top = `${buttonTop}px`;
+    customButton.style.left = `${buttonLeft}px`
+    customButton.style.top = `${buttonTop}px`
 
-    return { range, rect };
+    return { range, rect }
 }
 
 function showTranslationButton() {
-    const selectedText = window.getSelection().toString().trim();
+    const selectedText = window.getSelection().toString().trim()
     if (selectedText) {
-        const result = positionButtonAtSelection();
+        const result = positionButtonAtSelection()
         if (result) {
-            customButton.style.display = "flex";
-            translationModal.style.display = "none";
-            return true;
+            customButton.style.display = "flex"
+            translationModal.style.display = "none"
+            return true
         }
     }
-    return false;
+    return false
 }
 
 function hideUI() {
-    customButton.style.display = "none";
-    translationModal.style.display = "none";
+    customButton.style.display = "none"
+    translationModal.style.display = "none"
 }
 
 function showUI() {
-    customButton.style.display = "none";
-    translationModal.style.display = "block";
+    customButton.style.display = "none"
+    translationModal.style.display = "block"
 }
 
 function requestTranslation(text) {
-    translationModal.innerHTML = LOADER_UI;
+    // Render loader inside shadowRoot to avoid page CSS interference
+    if (translationModal.shadowRoot) {
+        translationModal.shadowRoot.innerHTML = LOADER_UI
+    } else {
+        translationModal.innerHTML = LOADER_UI
+    }
 
     try {
         chrome.storage.local.get(["target_language"], function (result) {
@@ -293,113 +356,129 @@ function requestTranslation(text) {
                 },
                 function (response) {
                     if (response && !response.error) {
-                        translationModal.innerHTML = getHTMLTemplate(response.translation);
-                        setupModalEventListeners(text);
+                        const html = getHTMLTemplate(response)
+                        if (translationModal.shadowRoot) {
+                            translationModal.shadowRoot.innerHTML = html
+                        } else {
+                            translationModal.innerHTML = html
+                        }
+                        setupModalEventListeners(text)
                     } else {
-                        translationModal.innerHTML = `
+                        const errHtml = `
                             <div style="padding: 15px; text-align: center;">
                                 <p>Translation failed: ${response?.error || "Unknown error"}</p>
                             </div>
-                        `;
+                        `
+                        if (translationModal.shadowRoot) {
+                            translationModal.shadowRoot.innerHTML = errHtml
+                        } else {
+                            translationModal.innerHTML = errHtml
+                        }
                     }
                 }
-            );
-        });
+            )
+        })
     } catch (error) {
-        console.error("Translation request error:", error);
-        translationModal.innerHTML = `
+        console.error("Translation request error:", error)
+        const errHtml = `
             <div style="padding: 15px; text-align: center;">
                 <p>Error occurred during translation: ${error.message}</p>
             </div>
-        `;
+        `
+        if (translationModal.shadowRoot) {
+            translationModal.shadowRoot.innerHTML = errHtml
+        } else {
+            translationModal.innerHTML = errHtml
+        }
     }
 }
 
 async function setupModalEventListeners(text) {
-    const closeButton = translationModal.querySelector(".close-button");
+    const root = translationModal.shadowRoot || translationModal
+    const closeButton = root.querySelector(".close-button")
     if (closeButton) {
         closeButton.addEventListener("click", function (e) {
-            e.stopPropagation();
-            hideUI();
-        });
+            e.stopPropagation()
+            hideUI()
+        })
     }
-    const speakButton = translationModal.querySelector(".speak-button");
+    const speakButton = root.querySelector(".speak-button")
     if (speakButton) {
         speakButton.addEventListener("click", async function (e) {
-            e.stopPropagation();
-            showUI();
-            showNotification("Đang phát âm");
+            e.stopPropagation()
+            showUI()
+            showNotification("Đang phát âm")
             if (text) {
-                const utterance = new SpeechSynthesisUtterance(text);
-                utterance.lang = (await detectLanguage(text)) || "en-US";
-                speechSynthesis.speak(utterance);
+                const utterance = new SpeechSynthesisUtterance(text)
+                utterance.lang = (await detectLanguage(text)) || "en-US"
+                speechSynthesis.speak(utterance)
             }
-        });
+        })
     }
-    const settingButton = translationModal.querySelector(".settings-button");
+    const settingButton = root.querySelector(".settings-button")
     if (settingButton) {
         settingButton.addEventListener("click", function (e) {
-            e.stopPropagation();
-            showUI();
+            e.stopPropagation()
+            showUI()
 
             if (chrome.runtime.openOptionsPage) {
-                chrome.runtime.openOptionsPage();
+                chrome.runtime.openOptionsPage()
             } else {
-                window.open(chrome.runtime.getURL("src/option/option.html"));
+                window.open(chrome.runtime.getURL("src/option/option.html"))
             }
-        });
+        })
     }
 
-    const sparklesButton = translationModal.querySelector(".sparkles-button");
+    const sparklesButton = root.querySelector(".sparkles-button")
     if (sparklesButton) {
         sparklesButton.addEventListener("click", function (e) {
-            e.stopPropagation();
-            showUI();
-            sparklesButton.style.cursor = "wait";
-            sparklesButton.style.opacity = "0.5";
-            showNotification("Đang dịch bằng AI...");
+            e.stopPropagation()
+            showUI()
+            sparklesButton.style.cursor = "wait"
+            sparklesButton.style.opacity = "0.5"
+            showNotification("Đang dịch bằng AI...")
             chrome.runtime.sendMessage({ action: "ai-enhance", text }, function (response) {
                 if (response.ok) {
-                    translationModal.querySelector(".quizzet-translator main p.translate-vi").textContent = response.parse;
-                    showNotification("Đã tối ưu hóa nội dung");
+                    const p = (translationModal.shadowRoot || translationModal).querySelector(".quizzet-translator main p.translate-vi")
+                    if (p) p.textContent = response.parse
+                    showNotification("Đã tối ưu hóa nội dung")
                 } else {
-                    showNotification("Không thể tối ưu hóa nội dung");
+                    showNotification("Không thể tối ưu hóa nội dung")
                 }
-                sparklesButton.style.cursor = "pointer";
-                sparklesButton.style.opacity = "1";
-            });
-        });
+                sparklesButton.style.cursor = "pointer"
+                sparklesButton.style.opacity = "1"
+            })
+        })
     }
 
-    const saveButton = translationModal.querySelector(".save");
-    const textBtn = saveButton.querySelector("p");
+    const saveButton = root.querySelector(".save")
+    const textBtn = saveButton ? saveButton.querySelector("p") : null
     chrome.storage.local.get(["list_flashcard_id"], function (result) {
         if (!result.list_flashcard_id) {
-            textBtn.textContent = `Bạn chưa đăng nhập, bấm vào cài đặt`;
-            window.open(chrome.runtime.getURL("src/option/option.html"));
-            saveButton.style.cursor = "not-allowed";
-            saveButton.style.opacity = "0.5";
-            return;
+            if (textBtn) textBtn.textContent = `Vui lòng đăng nhập`
+            saveButton.style.cursor = "not-allowed"
+            saveButton.style.opacity = "0.5"
+            return
         }
-        textBtn.textContent = `Lưu vào Flashcard`;
-    });
+        if (textBtn) textBtn.textContent = `Lưu vào Flashcard`
+    })
     if (saveButton) {
         saveButton.addEventListener("click", function (e) {
-            e.stopPropagation();
-            saveButton.style.cursor = "wait";
-            saveButton.style.opacity = "0.5";
-            showUI();
+            e.stopPropagation()
+            saveButton.style.cursor = "wait"
+            saveButton.style.opacity = "0.5"
+            showUI()
             if (text) {
                 // Save translation to local storage or send to server
                 chrome.storage.local.get(["list_flashcard_id"], function (result) {
-                    showNotification(`Đang lưu từ vựng vào ["${result.list_flashcard_id.title}"] `);
-                    list_flashcard_id = result.list_flashcard_id._id;
-                    textBtn.textContent = `Đang lưu...`;
+                    showNotification(`Đang lưu từ vựng vào ["${result.list_flashcard_id.title}"] `)
+                    list_flashcard_id = result.list_flashcard_id._id
+                    if (textBtn) textBtn.textContent = `Đang lưu...`
                     if (!list_flashcard_id) {
-                        showNotification("Vui lòng chọn flashcard trước khi lưu, vào setting để chọn flashcard");
-                        saveButton.style.cursor = "pointer";
-                        saveButton.style.opacity = "1";
-                        return;
+                        showNotification("Vui lòng chọn flashcard trước khi lưu, vào setting để chọn flashcard")
+                        saveButton.style.cursor = "pointer"
+                        saveButton.style.opacity = "1"
+                        return
                     }
                     chrome.runtime.sendMessage(
                         {
@@ -409,72 +488,75 @@ async function setupModalEventListeners(text) {
                         },
                         function (response) {
                             if (!response.ok) {
-                                showNotification(response.message);
+                                showNotification(response.message)
                             } else {
-                                showNotification(`Lưu từ "${response.flashcard.title}" vào flashcard ["${result.list_flashcard_id.title}"] thành công`);
-                                saveButton.style.cursor = "pointer";
-                                saveButton.style.opacity = "1";
-                                textBtn.textContent = `Lưu vào Flashcard`;
+                                showNotification(`Lưu từ "${response.flashcard.title}" vào flashcard ["${result.list_flashcard_id.title}"] thành công`)
+                                saveButton.style.cursor = "pointer"
+                                saveButton.style.opacity = "1"
+                                if (textBtn) textBtn.textContent = `Lưu vào Flashcard`
                             }
                         }
-                    );
-                });
+                    )
+                })
             }
-        });
+        })
     }
 }
 
 // Event Listeners
 document.addEventListener("mouseup", function (event) {
-    showTranslationButton();
-});
+    showTranslationButton()
+})
 
 document.addEventListener("dblclick", function () {
-    showTranslationButton();
-});
+    showTranslationButton()
+})
 
 document.addEventListener("mousedown", function (event) {
     // Only hide if clicking outside our UI elements
-    if (!customButton.contains(event.target) && !translationModal.contains(event.target)) {
-        hideUI();
+    // Use composedPath to detect clicks that occur inside shadow DOM
+    const path = event.composedPath ? event.composedPath() : event.path || []
+    const clickedInsideModal = path.includes(translationModal)
+    if (!customButton.contains(event.target) && !clickedInsideModal) {
+        hideUI()
     }
-});
+})
 
 customButton.addEventListener("click", function (event) {
-    event.stopPropagation();
+    event.stopPropagation()
 
-    const selectedText = window.getSelection().toString().trim();
-    if (!selectedText) return;
+    const selectedText = window.getSelection().toString().trim()
+    if (!selectedText) return
 
-    const selection = window.getSelection();
-    const range = selection.getRangeAt(0);
-    const rect = range.getBoundingClientRect();
+    const selection = window.getSelection()
+    const range = selection.getRangeAt(0)
+    const rect = range.getBoundingClientRect()
 
     // Set translation modal dimensions
-    const modalWidth = Math.max(rect.width, MIN_MODAL_WIDTH);
-    translationModal.style.width = `${modalWidth}px`;
+    const modalWidth = Math.max(rect.width, MIN_MODAL_WIDTH)
+    translationModal.style.width = `${modalWidth}px`
 
     // Calculate position to align with selection
-    const modalLeft = rect.left + window.scrollX;
-    const modalTop = rect.bottom + window.scrollY + 10;
+    const modalLeft = rect.left + window.scrollX
+    const modalTop = rect.bottom + window.scrollY + 10
 
     // Position modal directly under selection
-    translationModal.style.left = `${modalLeft}px`;
-    translationModal.style.top = `${modalTop}px`;
+    translationModal.style.left = `${modalLeft}px`
+    translationModal.style.top = `${modalTop}px`
 
-    translationModal.style.display = "block";
-    customButton.style.display = "none";
+    translationModal.style.display = "block"
+    customButton.style.display = "none"
 
-    requestTranslation(selectedText);
-});
+    requestTranslation(selectedText)
+})
 
 // Initialize
 translationModal.addEventListener("click", function (e) {
-    e.stopPropagation();
-});
+    e.stopPropagation()
+})
 
 function showNotification(message) {
-    const style = document.createElement("style");
+    const style = document.createElement("style")
     style.textContent = `
         .notification {
             position: fixed;
@@ -498,25 +580,25 @@ function showNotification(message) {
         .notification.success {
             background-color: #4caf50;
         }
-    `;
+    `
 
-    document.head.appendChild(style);
+    document.head.appendChild(style)
 
-    const notification = document.createElement("div");
-    notification.className = "notification";
-    notification.textContent = message;
-    document.body.appendChild(notification);
+    const notification = document.createElement("div")
+    notification.className = "notification"
+    notification.textContent = message
+    document.body.appendChild(notification)
 
     // Hiển thị notification
     setTimeout(() => {
-        notification.classList.add("show");
-    }, 10);
+        notification.classList.add("show")
+    }, 10)
 
     // Ẩn sau 2 giây
     setTimeout(() => {
-        notification.classList.remove("show");
+        notification.classList.remove("show")
         setTimeout(() => {
-            notification.remove();
-        }, 300);
-    }, 2000);
+            notification.remove()
+        }, 300)
+    }, 2000)
 }
