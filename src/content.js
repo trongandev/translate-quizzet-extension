@@ -168,17 +168,20 @@ function getHTMLTemplate(response) {
                     height: 38px;
                     object-fit: cover;
                 }
+                             .quizzet-translator .avatar .name {
+                                flex: 1;
+                             
+                             }
                 .quizzet-translator .avatar h2 {
                     font-size: 14px;
                     font-weight: 400;
                     margin: 0;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                    display: -webkit-box;
+                    -webkit-line-clamp: 2;
+                    -webkit-box-orient: vertical;
                 }
-                        .quizzet-translator .avatar .source-flashcard {
-                            display:flex;
-                            align-items:center;
-                            gap: 5px;
-                        }
-
                 .quizzet-translator select {
                     margin-top: 4px;
                     width: 100%;
@@ -211,10 +214,10 @@ function getHTMLTemplate(response) {
                     profile
                         ? ` <div class="avatar  part-of-speech">
                             <img class="profile-picture" src="${profile.profilePicture}" alt="" />
-                            <div class="">
+                            <div class="name">
                                 <h2>${profile.displayName}</h2>
-                                <h2 class="source-flashcard">
-                                    <img src="${ICONS.bookOpen}" width="10px" heigth="10px" /> ${list_flashcard_id.title + " | " + list_flashcard_id.language}
+                                <h2 class="">
+                             ${list_flashcard_id.language.slice(0, 3).toUpperCase() + " | " + list_flashcard_id.title}
                                 </h2>
                             </div>
                         </div>`
