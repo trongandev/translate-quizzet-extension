@@ -285,14 +285,13 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     if (request.action === "save-translation") {
         chrome.storage.local.get(["token", "list_flashcard_id"], (result) => {
-            const optimizedPrompt = OptimizedPrompt(request.text, result.list_flashcard_id.language)
             fetch(`${QUIZZET_BACKEND_API}/flashcards/create-ai`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
                     Authorization: `Bearer ${result.token}`,
                 },
-                body: JSON.stringify({ prompt: optimizedPrompt, list_flashcard_id: result.list_flashcard_id._id, language: result.list_flashcard_id.language }),
+                body: JSON.stringify({ word: request.text, language: result.list_flashcard_id.language }),
             })
                 .then((response) => response.json())
                 .then((data) => {
@@ -309,14 +308,13 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
     if (request.action === "ai-enhance") {
         chrome.storage.local.get(["token", "target_language"], (result) => {
-            const optimizedPrompt = optimizePronptAIEnhance(request.text, result.target_language)
             fetch(`${QUIZZET_BACKEND_API}/flashcards/translate`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
                     Authorization: `Bearer ${result.token}`,
                 },
-                body: JSON.stringify({ prompt: optimizedPrompt }),
+                body: JSON.stringify({ word: request.text, language: result.target_language }),
             })
                 .then((response) => response.json())
                 .then((data) => {

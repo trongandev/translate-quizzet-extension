@@ -1,7 +1,7 @@
 {
     "manifest_version": 3,
     "name": "Quizzet Translation Extension",
-    "version": "1.0.4",
+    "version": "1.0.7",
     "description": "Một công cụ giúp dịch thuật cũng như lưu lại từ vựng nhanh chóng trên trang quizzet.site",
     "permissions": ["activeTab", "cookies", "storage", "scripting", "tabs", "notifications"],
     "background": {
