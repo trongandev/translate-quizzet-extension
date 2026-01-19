@@ -378,7 +378,7 @@ function requestTranslation(text) {
                             translationModal.innerHTML = errHtml
                         }
                     }
-                }
+                },
             )
         })
     } catch (error) {
@@ -491,14 +491,14 @@ async function setupModalEventListeners(text) {
                         },
                         function (response) {
                             if (!response.ok) {
-                                showNotification(response.message)
+                                showNotification(response.message, "error")
                             } else {
                                 showNotification(`Lưu từ "${response.flashcard.title}" vào flashcard ["${result.list_flashcard_id.title}"] thành công`)
-                                saveButton.style.cursor = "pointer"
-                                saveButton.style.opacity = "1"
-                                if (textBtn) textBtn.textContent = `Lưu vào Flashcard`
                             }
-                        }
+                            saveButton.style.cursor = "pointer"
+                            saveButton.style.opacity = "1"
+                            if (textBtn) textBtn.textContent = `Lưu vào Flashcard`
+                        },
                     )
                 })
             }
@@ -558,15 +558,16 @@ translationModal.addEventListener("click", function (e) {
     e.stopPropagation()
 })
 
-function showNotification(message) {
+function showNotification(message, type = "success") {
     const style = document.createElement("style")
+    var type = type === "success" ? "#4caf50" : "#f44336"
     style.textContent = `
         .notification {
             position: fixed;
             top: 20px;
             right: 50%;
             transform: translateX(50%);
-            background-color: #4caf50;
+            background-color: ${type};
             color: white !important;
             padding: 15px;
             border-radius: 5px;
@@ -577,12 +578,7 @@ function showNotification(message) {
         .notification.show {
             opacity: 1;
         }
-        .notification.error {
-            background-color: #f44336;
-        }
-        .notification.success {
-            background-color: #4caf50;
-        }
+      
     `
 
     document.head.appendChild(style)

@@ -3,7 +3,7 @@
     "name": "Quizzet Translation Extension",
     "version": "1.0.7",
     "description": "Một công cụ giúp dịch thuật cũng như lưu lại từ vựng nhanh chóng trên trang quizzet.site",
-    "permissions": ["activeTab", "cookies", "storage", "scripting", "tabs", "notifications"],
+    "permissions": ["cookies", "storage", "notifications"],
     "background": {
         "service_worker": "src/background.js"
     },
